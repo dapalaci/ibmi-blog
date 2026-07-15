@@ -1,0 +1,38 @@
+---
+title: "Lo que un agente de IA hace cuando lee RPG sin documentación"
+excerpt: "El caso de uso más útil de la IA en shops legados no es escribir código nuevo. Es leer el código viejo que nadie más entiende."
+date: "2026-06-29"
+pillar: "ia"
+draft: false
+---
+
+Se habla mucho de IA generando código nuevo. En un entorno con sistemas legados, el uso que de verdad mueve la aguja es otro: leer código viejo, sin comentarios, sin documentación, y producir una explicación que un humano pueda verificar.
+
+## El problema no es la sintaxis, es el contexto perdido
+
+Un programa RPG de columna fija con nombres de variable de seis caracteres no es difícil de leer porque el lenguaje sea oscuro. Es difícil porque el contexto de negocio que explicaba por qué existe cada validación se perdió hace años, junto con la persona que lo escribió.
+
+Un agente de IA no recupera ese contexto por arte de magia. Lo que hace es algo más modesto y más útil: lee la estructura del programa, identifica patrones (validaciones, cálculos, llamadas a otros programas, acceso a archivos) y construye una hipótesis legible de qué hace cada sección, que un ingeniero humano puede confirmar o corregir mucho más rápido que leyendo mil líneas desde cero.
+
+## Dónde esto rinde de verdad
+
+En la práctica, tres usos concretos:
+
+1. **Inventario de lógica de negocio antes de modernizar.** Antes de decidir si envolver, reescribir o dejar en paz un programa, hay que saber qué hace. Pedirle a un agente que recorra un conjunto de programas y genere un resumen de reglas de negocio detectadas (con las líneas exactas como referencia) reduce semanas de arqueología manual a horas de revisión.
+2. **Detección de dependencias ocultas.** RPG heredado suele tener llamadas a programas que a su vez llaman a otros, con archivos físicos compartidos entre módulos que en teoría eran independientes. Un agente que mapea estas llamadas antes de tocar nada evita el clásico "cambiamos un campo y se rompió algo en otro departamento".
+3. **Traducción asistida, no automática.** Cuando sí toca reescribir una porción a un lenguaje moderno, usar el análisis del agente sobre el RPG original como especificación de partida da mejores resultados que pedirle directamente "traduce esto a Python", porque separa el paso de "entender qué hace" del paso de "escribir el equivalente".
+
+<Figure
+  src="/diagrams/ia-lee-rpg-flujo.png"
+  alt="Diagrama del flujo del agente que lee RPG legado. A la izquierda, la entrada: programas RPG sin documentación, objetos *PGM, *SRVPGM y *FILE. En el centro, el agente IA que detecta validaciones, cálculos, llamadas entre programas y acceso a archivos. A la derecha arriba, tres salidas verificables: inventario de reglas con línea y programa, mapa de dependencias tipo call graph, y especificación para reescritura. Debajo, el ingeniero humano que confirma o corrige, con una flecha punteada roja que vuelve al agente por el margen izquierdo."
+>
+  El agente propone lecturas verificables con línea exacta. Cierra el ciclo un ingeniero humano que confirma o corrige — no una decisión automática.
+</Figure>
+
+## La parte donde hay que tener cuidado
+
+Un agente puede describir con seguridad una lógica que interpretó mal. Si el RPG original tiene un bug de quince años que nadie detectó porque compensaba con otro bug en otro programa, el agente puede describir ese comportamiento como si fuera intencional, porque no tiene forma de saber que no lo es.
+
+Por eso el flujo que mejor funciona no es "el agente decide", es "el agente propone una lectura verificable, con referencias a las líneas exactas, y un ingeniero que conoce el negocio la confirma o la corrige". La IA acelera la primera lectura. No reemplaza el juicio de alguien que entiende por qué el sistema hace lo que hace.
+
+Ese es, en el fondo, el valor real: no que la IA escriba RPG ni que lo reemplace, sino que hace que el conocimiento tácito atrapado en código sin documentar vuelva a ser algo que un equipo puede discutir con datos concretos, en vez de con memoria de quien lleva más años ahí.

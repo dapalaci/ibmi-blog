@@ -1,0 +1,44 @@
+---
+title: "Arquitectura híbrida: IBMi en el centro, la nube alrededor"
+excerpt: "No toda modernización implica sacar el IBMi del cuarto de servidores. A veces el diseño correcto es dejarlo donde está y construir alrededor."
+date: "2026-06-22"
+pillar: "cloud"
+draft: false
+---
+
+Hay una suposición implícita en muchas conversaciones de modernización: que el objetivo final es "sacar todo de IBMi". No siempre es así, y tratarlo como un axioma lleva a proyectos que gastan presupuesto en migrar cosas que no necesitaban migrarse.
+
+## El caso por dejarlo donde está
+
+IBM Power sigue siendo, para ciertas cargas, una plataforma con una relación de throughput por costo y estabilidad operativa difícil de igualar. Un sistema que procesa transacciones financieras de forma confiable durante quince años sin downtime no planificado relevante tiene un valor que no aparece en ningún diagrama de arquitectura moderno.
+
+La pregunta que importa no es "¿cómo migro esto a la nube?" sino "¿qué necesita hablar con este sistema, y cuál es la forma más segura de que lo haga?".
+
+## Un patrón que funciona: satélites en la nube, núcleo en IBMi
+
+En la práctica, esto se ve así:
+
+- El **IBMi mantiene** los sistemas de registro (system of record): la base transaccional, las reglas de negocio críticas, los procesos batch que ya están afinados.
+- **Servicios satélite en contenedores** (en AWS, Azure o donde corresponda) manejan lo que cambia rápido: interfaces de usuario, integraciones con terceros, notificaciones, analítica en tiempo real.
+- La comunicación entre ambos mundos pasa por una capa de integración explícita: colas de mensajes, APIs, o herramientas de replicación de datos como CDC (change data capture) hacia un data warehouse en la nube para analítica, sin tocar el sistema transaccional original.
+
+<Figure
+  src="/diagrams/integracion-hibrida.png"
+  alt="Diagrama esquemático de integración híbrida: a la izquierda, la zona IBMi con programas RPG, DB2 for i, reglas de negocio, autenticación legada y SEU/RDi. En el centro, un puente con API Gateway (OAuth), bus de eventos y VPN/Direct Connect. A la derecha, la zona de nube pública con contenedores/serverless, almacén de datos, observabilidad, pipeline DevOps y servicios de IA. Un agente IA externo lee las reglas RPG con una flecha punteada."
+>
+  Componentes típicos de la integración. Sólido = llamadas síncronas (REST/SOAP, invocación, deploy). Naranja punteado = eventos asíncronos (CDC, persistencia). Púrpura punteado = IA leyendo código legado.
+</Figure>
+
+## Lo que casi nadie dice sobre el CI/CD en este contexto
+
+Aquí está el punto que menos se documenta: **el pipeline de CI/CD no puede ser el mismo para el IBMi y para los satélites**, y forzarlo suele ser un error.
+
+Los servicios en contenedores pueden vivir en un pipeline moderno completo: build, test automatizado, deploy progresivo. El IBMi, en la mayoría de los shops, todavía opera con ventanas de cambio más controladas y un ciclo de promoción de objetos (`*PGM`, `*SRVPGM`, `*FILE`) que no calza naturalmente con un `git push` a producción. Intentar meter el IBMi a la fuerza en un flujo de deploy continuo sin adaptar el proceso genera fricción, no velocidad.
+
+Lo que sí funciona: automatizar lo automatizable (compilación, análisis estático de RPG, pruebas de regresión sobre programas de servicio) y mantener un punto de control humano explícito para la promoción a producción del núcleo transaccional.
+
+## La pregunta de diseño real
+
+No es "cloud sí o cloud no". Es: ¿qué componentes de este sistema cambian rápido y se benefician de elasticidad y despliegue continuo, y cuáles son estables, críticos, y se benefician más de la solidez operativa que ya tienen?
+
+Diseñar la frontera entre esos dos mundos —y no borrarla por dogma— suele ser el trabajo de arquitectura más valioso en estos proyectos.

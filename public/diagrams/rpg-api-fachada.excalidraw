@@ -1,0 +1,424 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "mrmkql7ugittw68j6wb",
+      "type": "text",
+      "x": 380,
+      "y": 40,
+      "strokeColor": "#1e1e1e",
+      "text": "Fachada REST sobre un programa RPG",
+      "fontSize": 26,
+      "createdAt": "2026-07-15T21:18:27.139Z",
+      "updatedAt": "2026-07-15T21:18:27.139Z",
+      "version": 1
+    },
+    {
+      "id": "zone_consumers",
+      "type": "rectangle",
+      "x": 60,
+      "y": 100,
+      "width": 280,
+      "height": 395,
+      "backgroundColor": "#f8f9fa",
+      "strokeColor": "#868e96",
+      "roughness": 0,
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:20:03.597Z",
+      "version": 2
+    },
+    {
+      "id": "mrmkql7u1wcjmwa932q",
+      "type": "text",
+      "x": 80,
+      "y": 118,
+      "strokeColor": "#1e1e1e",
+      "text": "Consumidores",
+      "fontSize": 18,
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "web",
+      "type": "rectangle",
+      "x": 90,
+      "y": 160,
+      "width": 220,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Frontend web"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "mobile",
+      "type": "rectangle",
+      "x": 90,
+      "y": 245,
+      "width": 220,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "App móvil"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "microservices",
+      "type": "rectangle",
+      "x": 90,
+      "y": 330,
+      "width": 220,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Microservicios"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "automation",
+      "type": "rectangle",
+      "x": 90,
+      "y": 415,
+      "width": 220,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Automatización interna"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "zone_facade",
+      "type": "rectangle",
+      "x": 400,
+      "y": 100,
+      "width": 460,
+      "height": 485,
+      "backgroundColor": "#fff4e6",
+      "strokeColor": "#e8590c",
+      "roughness": 0,
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:20:10.278Z",
+      "version": 2
+    },
+    {
+      "id": "mrmkql7u0uclglelagp9",
+      "type": "text",
+      "x": 420,
+      "y": 118,
+      "strokeColor": "#e8590c",
+      "text": "Capa fachada",
+      "fontSize": 18,
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "endpoint",
+      "type": "rectangle",
+      "x": 430,
+      "y": 160,
+      "width": 400,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "IWS / Node en PASE (endpoint HTTP)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "mapping",
+      "type": "rectangle",
+      "x": 430,
+      "y": 245,
+      "width": 400,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "Mapeo de datos (DDS · decimales · fechas)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "errors",
+      "type": "rectangle",
+      "x": 430,
+      "y": 330,
+      "width": 400,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "Errores (*ESCAPE → HTTP 4xx / 5xx)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "session",
+      "type": "rectangle",
+      "x": 430,
+      "y": 415,
+      "width": 400,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "Sesión 5250 → stateless"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.140Z",
+      "updatedAt": "2026-07-15T21:18:27.140Z",
+      "version": 1
+    },
+    {
+      "id": "concurrency",
+      "type": "rectangle",
+      "x": 430,
+      "y": 500,
+      "width": 400,
+      "height": 60,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "Concurrencia (jobs · subsistema)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "zone_ibmi",
+      "type": "rectangle",
+      "x": 920,
+      "y": 100,
+      "width": 340,
+      "height": 320,
+      "backgroundColor": "#f8f9fa",
+      "strokeColor": "#868e96",
+      "roughness": 0,
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:19:54.900Z",
+      "version": 3
+    },
+    {
+      "id": "mrmkql7uq09sb9r68do",
+      "type": "text",
+      "x": 940,
+      "y": 118,
+      "strokeColor": "#1e1e1e",
+      "text": "IBMi (sin tocar)",
+      "fontSize": 18,
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "pgm",
+      "type": "rectangle",
+      "x": 940,
+      "y": 160,
+      "width": 300,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Programa RPG (*PGM)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "srvpgm",
+      "type": "rectangle",
+      "x": 940,
+      "y": 245,
+      "width": 300,
+      "height": 60,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Programa servicio (*SRVPGM)"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "db2",
+      "type": "rectangle",
+      "x": 940,
+      "y": 330,
+      "width": 300,
+      "height": 60,
+      "backgroundColor": "#99e9f2",
+      "strokeColor": "#0c8599",
+      "label": {
+        "text": "DB2 for i"
+      },
+      "fillStyle": "solid",
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "mrmkquiw5ssxqade9li",
+      "type": "arrow",
+      "x": 318,
+      "y": 190,
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "HTTP"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          104,
+          2.842170943040401e-14
+        ]
+      ],
+      "start": {
+        "id": "web"
+      },
+      "end": {
+        "id": "endpoint"
+      },
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "mrmkquiwfyxvzeggsx8",
+      "type": "arrow",
+      "x": 838,
+      "y": 190,
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "CALL PGM"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          94,
+          2.842170943040401e-14
+        ]
+      ],
+      "start": {
+        "id": "endpoint"
+      },
+      "end": {
+        "id": "pgm"
+      },
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "mrmkquiwx05b3625t5g",
+      "type": "arrow",
+      "x": 1090,
+      "y": 228,
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "invoca"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          9
+        ]
+      ],
+      "start": {
+        "id": "pgm"
+      },
+      "end": {
+        "id": "srvpgm"
+      },
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    },
+    {
+      "id": "mrmkquiw9c1pkvl99gi",
+      "type": "arrow",
+      "x": 1090,
+      "y": 313,
+      "strokeColor": "#0c8599",
+      "label": {
+        "text": "SQL / RLA"
+      },
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          9
+        ]
+      ],
+      "start": {
+        "id": "srvpgm"
+      },
+      "end": {
+        "id": "db2"
+      },
+      "createdAt": "2026-07-15T21:18:27.141Z",
+      "updatedAt": "2026-07-15T21:18:27.141Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

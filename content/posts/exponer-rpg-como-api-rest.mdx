@@ -1,0 +1,48 @@
+---
+title: "Exponer un programa RPG como API REST sin reescribirlo"
+excerpt: "El patrón strangler aplicado a IBMi: cómo envolver un programa legado en una API sin tocar la lógica de negocio que ya funciona."
+date: "2026-06-15"
+pillar: "ibmi"
+draft: false
+---
+
+La pregunta que más escucho de equipos que heredan un sistema IBMi no es "¿cómo lo migramos?". Es "¿cómo lo conectamos con lo que ya tenemos en la nube sin apagar producción tres días?". La respuesta casi siempre empieza igual: no migres el programa, envuélvelo.
+
+## El problema real no es el RPG
+
+Un programa RPG que procesa transacciones desde hace quince años no es deuda técnica por definición. Si autoriza pagos correctamente, valida reglas de negocio que nadie volvió a documentar y corre con un throughput que un rewrite tardaría meses en igualar, el problema no es el lenguaje. El problema es que solo habla 5250 y nada más en tu stack habla eso.
+
+Ahí es donde entra exponerlo como API.
+
+## El patrón: fachada, no reescritura
+
+La idea es simple en el papel: un servicio intermedio recibe una petición HTTP, la traduce a una llamada de programa (call program) sobre el RPG existente, y devuelve la respuesta como JSON. El programa legado no se entera de que ahora lo llama un microservicio en vez de una pantalla verde.
+
+En IBMi esto se apoya normalmente en:
+
+- **Integrated Web Services (IWS)** o un runtime como **Node.js sobre PASE** para exponer el endpoint.
+- **Programas de servicio (`*SRVPGM`)** si el RPG original todavía es monolítico y conviene aislar la lógica reusable antes de envolverla.
+- Una capa de **mapeo de datos**: los campos de un DDS o de una estructura de datos externa no llegan limpios a JSON, hay que normalizar tipos, decimales empaquetados y fechas en formato juliano.
+
+<Figure
+  src="/diagrams/rpg-api-fachada.png"
+  alt="Diagrama de la fachada REST sobre un programa RPG: a la izquierda, consumidores (frontend web, app móvil, microservicios, automatización interna) llegando por HTTP. En el centro, la capa fachada con endpoint IWS/Node en PASE, mapeo de datos, manejo de errores, sesión stateless y concurrencia. A la derecha, el IBMi sin tocar, con Programa RPG, Programa servicio y DB2 for i."
+>
+  La fachada absorbe el trabajo que el RPG no debería aprender: mapeo, errores, sesión y concurrencia. El núcleo transaccional del IBMi (`*PGM`, `*SRVPGM`, DB2) queda intacto.
+</Figure>
+
+## Dónde se rompe en la práctica
+
+Lo que no cuentan los diagramas de arquitectura es que el 80% del esfuerzo está en tres lugares:
+
+1. **Manejo de errores.** Un programa RPG que termina con un `*ESCAPE` o un mensaje en el joblog no tiene un "500 Internal Server Error" nativo. Hay que capturar eso explícitamente y traducirlo a un código HTTP con sentido.
+2. **Sesión y estado.** Muchos programas legados asumen un contexto de sesión 5250 (usuario, librería actual, valores de trabajo). Una API REST es stateless por diseño. Ese descalce hay que resolverlo en la capa intermedia, no en el RPG.
+3. **Concurrencia.** Un programa pensado para una pantalla a la vez puede no tolerar bien que diez requests HTTP lo llamen en paralelo. Vale la pena revisar si usa objetos compartidos o si necesita ejecutarse en jobs por batch/subsistema aislado.
+
+## Cuándo tiene sentido y cuándo no
+
+Este patrón funciona cuando el programa legado tiene lógica de negocio valiosa y estable. No lo uses como excusa para posponer indefinidamente una modernización real: si el programa está lleno de parches sobre parches y nadie entiende ya sus reglas, envolverlo solo pospone el problema con una capa más de complejidad encima.
+
+La pregunta que me hago antes de envolver algo: ¿este programa es correcto y solo le falta un lenguaje moderno para hablar con el resto del mundo, o es incorrecto y el mundo moderno solo va a heredar sus bugs más rápido?
+
+Si la respuesta es lo primero, la fachada API es, probablemente, la decisión más barata y reversible que vas a tomar este trimestre.
