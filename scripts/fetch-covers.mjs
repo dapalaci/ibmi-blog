@@ -82,4 +82,22 @@ const md = [
 ];
 
 await writeFile(path.join(COVERS_DIR, "CREDITS.md"), md.join("\n"), "utf8");
-console.log(`\nCREDITS.md escrito con ${credits.length} entradas.`);
+
+const manifest = credits.map(({ slug, q, meta }) => ({
+  slug,
+  query: q,
+  title: meta.title || "(sin título)",
+  creator: meta.creator || "(desconocido)",
+  license: (meta.license || "").toUpperCase(),
+  license_version: meta.license_version || "",
+  license_url: meta.license_url || "",
+  source_url: meta.foreign_landing_url || meta.url,
+}));
+
+await writeFile(
+  path.join(COVERS_DIR, "manifest.json"),
+  JSON.stringify(manifest, null, 2) + "\n",
+  "utf8",
+);
+
+console.log(`\nCREDITS.md + manifest.json escritos con ${credits.length} entradas.`);
