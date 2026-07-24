@@ -12,6 +12,7 @@ export interface PostFrontmatter {
   date: string;
   pillar: PillarSlug;
   draft?: boolean;
+  cover?: string;
 }
 
 export interface PostSummary extends PostFrontmatter {
@@ -37,6 +38,7 @@ function readPostFile(fileName: string): Post {
     date: data.date,
     pillar: data.pillar,
     draft: Boolean(data.draft),
+    cover: data.cover ?? undefined,
     readingMinutes: Math.max(1, Math.round(stats.minutes)),
   };
 }

@@ -33,7 +33,7 @@ export function PillarNav({ postPillarMap }: Props) {
   const state = resolveActive(pathname, postPillarMap);
 
   return (
-    <nav className="flex gap-5 font-mono text-sm uppercase tracking-wide text-ink-soft">
+    <nav className="flex items-center gap-1 font-mono text-xs uppercase tracking-[0.2em]">
       {(Object.keys(pillars) as PillarSlug[]).map((slug) => {
         const p = pillars[slug];
         const active = state.pillar === slug;
@@ -49,9 +49,10 @@ export function PillarNav({ postPillarMap }: Props) {
                 : undefined
             }
             className={
-              active
-                ? "text-accent-ink"
-                : "hover:text-accent-ink transition-colors"
+              "px-3 py-1.5 rounded-full transition-colors " +
+              (active
+                ? "text-ink bg-canvas/60"
+                : "text-ink-soft hover:text-ink")
             }
           >
             {p.path}

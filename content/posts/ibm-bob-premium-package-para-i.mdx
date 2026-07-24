@@ -1,0 +1,45 @@
+---
+title: "Bob 2.0 y el Premium Package para i: qué cambia de verdad para un shop RPG"
+excerpt: "IBM actualizó su asistente agéntico Bob y lanzó un paquete específico para IBM i que por fin habla el idioma de QSYS e IFS. Repasamos qué trae, qué cuesta y qué preguntas conviene hacerse antes de activarlo."
+date: "2026-07-21"
+pillar: "ibmi"
+draft: true
+---
+
+El 24 de junio IBM puso en disponibilidad general dos cosas relacionadas pero distintas: la versión 2.0 de su asistente agéntico de desarrollo, Bob, y el primero de tres "Premium Packages" construidos sobre esa base, dedicado específicamente a IBM i. El 9 de julio IBM sumó una segunda tanda de anuncios —analítica de costos, capacidades multiagente— y el 13 de julio IT Jungle publicó el desglose más completo de qué trae cada pieza. Para un shop que corre RPG en producción, vale la pena separar el ruido de marketing de lo que efectivamente cambia en el día a día.
+
+## Qué trae Bob 2.0, más allá del número de versión
+
+Bob 1.0 tenía dos ejecutables —la extensión de VS Code y un entorno de shell— construidos sobre bases separadas, lo que obligaba a IBM a duplicar cada mejora. Bob 2.0 unifica eso en una arquitectura de tres capas: el agente (razonamiento y generación de código), el harness (autenticación, logging, telemetría) y los clientes (la interfaz, hoy la IDE, con el shell todavía sin publicar). Según IBM, el resultado práctico es que el agente se comporta igual sin importar desde dónde se lo invoque, y corre más rápido.
+
+Tres cambios concretos, según la cobertura de IT Jungle:
+
+Primero, subagentes: para tareas exploratorias —por ejemplo, entender cómo funciona la autenticación en una base de código— Bob puede delegar en subagentes que trabajan en paralelo con una ventana de contexto limpia y devuelven un resumen al agente principal, en lugar de saturar el contexto de la conversación principal con cada archivo leído.
+
+Segundo, llamadas a herramientas en paralelo y nativas: antes, cada llamada a una herramienta se ejecutaba de a una y se envolvía en XML. IBM reporta que tareas que tomaban 30 segundos ahora toman menos de 10, y que el formato nativo consume menos tokens. La ventana de contexto también creció, de 200.000 a 270.000 tokens, y Bob ahora lee .docx, .xlsx y .pdf de forma nativa.
+
+Tercero, workflows: Bob 2.0 introduce un mecanismo para dar estructura a procesos repetibles, con pasos que no necesariamente involucran IA en cada uno. Es el mecanismo que sostiene los Premium Packages, incluido el de IBM i.
+
+También cambió el modelo de checkpoints: la versión anterior dependía de Git para poder revertir cambios, lo cual dejaba afuera a la mayoría de shops de IBM i que no versionan su código así. La nueva función de "rollbacks" no depende de Git y funciona a nivel de tarea, conversación o llamada individual a una herramienta.
+
+## El Premium Package para i: la parte que de verdad importa acá
+
+La limitación más comentada de la primera versión de Bob era que necesitaba el código fuente accesible desde la PC del desarrollador o desde un repositorio Git. Para la mayoría de desarrolladores de IBM i, cuyo código vive en miembros fuente dentro de QSYS o en el IFS, eso era una barrera de entrada real. El Premium Package para i resuelve exactamente eso: conexión directa al IBM i, sin necesidad de mover el código a otro lado primero.
+
+Sobre esa base se agregan dos modos específicos. El "IBM i Developer Mode" le da a Bob conocimiento de las particularidades de la plataforma —RPG, COBOL, DDS, SQL, CL, incluido el ciclo RPG clásico— y la capacidad de ejecutar comandos CL o scripts PASE como parte de su trabajo. El "Database Mode" lo especializa en Db2 for i: escribir SQL, revisarlo, explicarlo y aplicar buenas prácticas del motor de consultas, según describió Tim Rowe, arquitecto de herramientas de desarrollo de IBM i, en el podcast iChime de Charlie Guarino.
+
+El paquete suma, según IT Jungle, unas 40 skills y workflows nuevos —extracción de reglas de negocio, compilación de código, generación de display files, conversión de RPG de formato fijo a libre— y unas 30 herramientas específicas: lectura y escritura en QSYS o IFS, ejecución de comandos CL y sentencias SQL, apertura de sesiones 5250, gestión de listas de bibliotecas. También agrega soporte de RAG para consultar documentación de IBM i.
+
+El costo es aditivo: el Premium Package para i suma entre 20 y 40 dólares mensuales sobre el plan base de Bob (Pro, de 60 a 80 dólares con el paquete incluido; Pro+, 100 dólares; Ultra, 240 dólares).
+
+## Un caso citado por IBM, con la cautela que corresponde
+
+En su comunicado del 9 de julio, IBM cita a Kevin Sligar, arquitecto técnico jefe de Jack Henry, proveedor de software bancario que corre sobre IBM i: según su testimonio, sus desarrolladores usan Bob para acelerar flujos de trabajo en RPG, mejorar la calidad del código y ganar visibilidad sobre décadas de conocimiento acumulado en el sistema. Es un testimonio proporcionado por IBM en su propio material de prensa, no una medición independiente, y vale leerlo con esa salvedad: no hay cifras de productividad específicas para el caso de IBM i, a diferencia de otros testimonios que IBM incluyó para Bob en general.
+
+Ese mismo comunicado cita un dato externo interesante para poner el anuncio en contexto: según un reporte de GitLab de 2026 citado por IBM, el 85% de profesionales de DevSecOps encuestados coincide en que la IA ya desplazó el cuello de botella de escribir código hacia revisarlo y validarlo. Es la razón de fondo por la que IBM empuja workflows auditables y "rollbacks" en lugar de simplemente generación de código más rápida: el problema que quedó sin resolver no es escribir, es confiar en lo que se escribió.
+
+## Qué hacer con esto esta semana
+
+Si tu shop ya evaluaba asistentes de IA para RPG, esto cambia el cálculo de entrada porque elimina la excusa técnica más común: "nuestro código vive en QSYS, no en Git". Antes de activarlo en algo crítico, conviene acotar el piloto a un workflow bien definido —por ejemplo, documentar un programa sin comentarios o convertir un módulo puntual de formato fijo a libre— y usar la nueva analítica de costos (Bobalytics, anunciada el mismo 9 de julio) para medir consumo real antes de escalarlo a todo el equipo. Y para cualquier tarea que toque lógica de negocio con impacto en producción, mantené una revisión humana explícita: el propio dato de GitLab que cita IBM confirma que ese paso no desapareció, solo se movió.
+
+OCEAN TechCon 2026, el evento de IBM i más importante de la costa oeste de Estados Unidos, tiene su día virtual el 23 de julio y el presencial el 24; es un buen lugar para escuchar de primera mano cómo lo están probando otros shops antes de decidir.

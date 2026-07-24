@@ -1,0 +1,31 @@
+---
+title: "El Power S1112 y el TR2: por qué IBM esperó al hardware antes de refrescar IBM i"
+excerpt: "IBM anunció su primer servidor de entrada con Power11, el S1112, y recién después liberó el Technology Refresh de julio. El orden no fue casualidad, y tiene implicancias concretas para cualquier shop que esté pensando en su próxima renovación de hardware."
+date: "2026-07-23"
+pillar: "ibmi"
+draft: true
+---
+
+El miércoles 15 de julio IBM presentó el Power S1112, su nuevo servidor de entrada basado en Power11, conocido durante meses por su nombre en código "Bonnell+". Recién el viernes 17, dos días después, liberó el primer Technology Refresh de IBM i de 2026: TR2 para la 7.6 y TR8 para la 7.5. Según reportó IT Jungle, el orden no fue casualidad — IBM prefirió anunciar primero el hardware nuevo porque una de las funciones centrales de un TR es agregar soporte de sistema operativo para las máquinas que acaban de salir. Para un shop de IBM i que viene posponiendo la conversación sobre renovar hardware, este anuncio conjunto es un buen punto de partida para entender qué cambia y qué todavía no se sabe.
+
+## Un servidor de entrada que llegó tarde, pero con una particularidad
+
+El S1112 venía siendo esperado desde hacía tiempo. Partners de canal lo ubicaban para el primer trimestre de 2026, con marzo como fecha más mencionada, así que su llegada en julio es, en el mejor de los casos, un retraso de varios meses. Pero el dato que más importa no es cuándo llegó, sino dónde quedó ubicado: el S1112 es, por ahora, el único sistema de la familia Power11 clasificado en el tier de software P05, el más económico de los niveles que IBM usa para licenciar IBM i y Db2 for i. Eso lo vuelve, de hecho, la única puerta de entrada a Power11 para los shops más chicos, que son justamente los que más sensibles son al costo de licenciamiento por tier.
+
+En términos de hardware, el S1112 ofrece dos configuraciones de procesador: una tarjeta (feature #EJMT) de uno a cuatro núcleos Power11 a 3.6 GHz base y hasta 4 GHz en boost, y otra (#EJSV) con 10 de los 16 núcleos del chip activados, a 3.05 GHz base con el mismo tope de 4 GHz. La memoria usa cuatro slots DDR5 sobre interfaz OMI, con un mínimo de 64 GB por tarjeta. Para quedar dentro del tier P05, eso sí, el sistema queda limitado a 4 núcleos y 64 GB de memoria — subir de ahí probablemente implique saltar de tier de licenciamiento, algo que conviene confirmar con el partner de IBM antes de dimensionar cualquier propuesta.
+
+IBM reporta que el rendimiento por núcleo duplica al del Power S914 y lo triplica respecto del viejo Power S814, con hasta 69% más eficiencia energética que el S914. También soporta particiones Linux conviviendo con IBM i en el mismo chasis, y trae la unidad de aceleración matricial on-chip de Power11 para correr inferencia de IA localmente, sin depender de una GPU externa. IBM la está posicionando como la puerta de entrada a inferencia de IA on-premise para shops que no van a justificar una GPU dedicada solo para eso — vale la pena tomarlo como la dirección que IBM quiere marcarle al mercado, más que como una funcionalidad ya probada en producción por shops de IBM i, porque todavía no hay casos documentados de uso real con esa combinación específica.
+
+La disponibilidad es escalonada: el S1112 empieza a enviarse el 24 de julio en la mayoría del mundo, con Taiwán recibiendo unidades desde el 14 de septiembre y China e India desde el 11 de diciembre. El precio, al momento de escribir esto, todavía no está publicado.
+
+## Qué trajo el Technology Refresh, más allá de habilitar el hardware nuevo
+
+Con el hardware ya en el mercado, TR2 (7.6) y TR8 (7.5) llegaron el viernes 17 con el rol que les toca: dar soporte de sistema operativo al S1112 y sumar el paquete habitual de mejoras incrementales. Según la documentación de IBM, el foco de este TR está en Db2 for i (mejoras a SQL) y en RPG, junto con cambios más chicos pero visibles en el día a día: Navigator for i pasa a correr sobre Java 21 cuando está disponible, mejoran los mensajes de error de login y la forma en que se muestra información de CVEs, y se suma soporte para notebooks dentro de Navigator. Como es habitual en estos ciclos, una parte de las mejoras llegó solo a la 7.6 y no fue retroportada a la 7.5, así que conviene revisar el detalle release por release antes de asumir paridad entre versiones.
+
+El mismo paquete de PTFs de julio (Volume 28, Números 23 y 24, según la numeración de IT Jungle) trajo además correcciones de seguridad relevantes: más de 15 CVEs resueltos en Rational Developer for i, y parches para vulnerabilidades del IBM Java SDK y el Java Runtime que también afectan a IBM i. Si tu shop todavía no aplicó ese paquete de PTFs, es la parte de este anuncio con el reloj corriendo más rápido — a diferencia del hardware nuevo, que se puede evaluar con calma, un CVE sin parchear en un componente de desarrollo expuesto es una ventana de riesgo activa.
+
+## Qué hacer con esto esta semana
+
+Si tu organización todavía corre sobre Power9 o hardware anterior y el análisis de renovación viene postergándose "hasta que salga algo nuevo", el S1112 le pone un nombre concreto a esa espera, con dos advertencias. La primera es que el precio todavía no está publicado, así que cualquier proyección de presupuesto por ahora es provisoria. La segunda es que el límite de 4 núcleos y 64 GB para mantenerse en tier P05 puede quedarse corto más rápido de lo esperado si tu carga de trabajo viene creciendo; vale la pena pedirle al partner una proyección a tres años, no solo el dimensionamiento de hoy, antes de comprometerse con la configuración más económica.
+
+Para el resto de los shops, la acción concreta y sin ambigüedad es la de siempre: aplicar el paquete de PTFs de julio por las correcciones de seguridad, evaluar el TR2 o TR8 según tu versión en un ambiente de pruebas, y recién después mirar el hardware nuevo con la calma que permite no tener el reloj de un CVE corriendo en paralelo.
