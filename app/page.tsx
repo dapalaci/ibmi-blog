@@ -32,7 +32,7 @@ export default function Home() {
           style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
         >
           Modernizar sin borrar la{" "}
-          <em className="italic text-accent">memoria del sistema</em>.
+          <em className="not-italic text-accent">memoria del sistema</em>.
         </h1>
         <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft">
           {site.description}
