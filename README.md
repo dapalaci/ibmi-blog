@@ -89,3 +89,17 @@ Cloudflare Pages, servido como sitio estático puro (`out/` generado por `next b
 - Node version: 20+
 
 El script `build` también elimina `out/hero-lab/` para que esa ruta responda 404 en producción.
+
+## Covers de posts
+
+Cada post tiene una imagen de portada declarada en su frontmatter (`cover: "/covers/<slug>.jpg"`).
+Las imágenes se refrescan con:
+
+```bash
+node scripts/fetch-covers.mjs
+```
+
+Baja una imagen por query desde Openverse (CC, sin API key) a `public/covers/<slug>.jpg`
+y regenera `public/covers/CREDITS.md` con la atribución de cada foto. Para cambiar la temática
+de un cover, editá la `query` de ese slug en el script y volvelo a correr — o simplemente
+reemplazá el `.jpg` a mano con lo que quieras (mismo nombre, cualquier proporción).
