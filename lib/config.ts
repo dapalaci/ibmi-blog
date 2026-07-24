@@ -1,5 +1,6 @@
 export const site = {
   name: "puente /i",
+  url: "https://ibmi-blog.pages.dev",
   tagline: "Modernización IBMi, nube e IA aplicada al desarrollo.",
   description:
     "Notas técnicas sobre cómo llevar sistemas IBMi/AS400 hacia la nube, y cómo la IA cambia el trabajo diario de un ingeniero de sistemas legados.",
