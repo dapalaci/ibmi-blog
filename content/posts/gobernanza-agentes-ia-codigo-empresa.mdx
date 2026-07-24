@@ -1,0 +1,42 @@
+---
+title: "SSO, topes de gasto y telemetría: así empieza a gobernarse la IA de código en la empresa"
+excerpt: "En las últimas semanas Anthropic y AWS lanzaron piezas complementarias — un gateway empresarial y un panel de observabilidad — que muestran hacia dónde va la adopción de agentes de código: de herramienta individual a infraestructura gobernada."
+date: "2026-07-23"
+pillar: "cloud"
+cover: "/covers/gobernanza-agentes-ia-codigo-empresa.jpg"
+draft: true
+---
+
+Hasta hace poco, llevar un agente de código como Claude Code o Copilot a un equipo grande se resolvía de una forma bastante artesanal: cada desarrollador con su propia clave de API o sus propias credenciales de nube, el gasto mensual apareciendo como una sorpresa en la factura, y ningún dato real sobre si la herramienta estaba acelerando entregas o simplemente generando ruido. Funcionaba para un piloto de diez personas. Se rompía en cuanto una organización de mil ingenieros intentaba estandarizarlo.
+
+Dos anuncios de las últimas semanas apuntan directo a ese problema. El 29 de junio Anthropic lanzó el Claude apps gateway, un plano de control autoalojado para correr Claude Code sobre Amazon Bedrock, Google Cloud o Microsoft Foundry con inicio de sesión corporativo. Y a mediados de julio Amazon anunció CloudWatch Coding Agent Insights, un panel que recoge telemetría de agentes de código —incluido Claude Code, pero también Codex y GitHub Copilot— y la muestra junto al resto de los datos operativos que un equipo de plataforma ya monitorea. Ninguno de los dos es glamoroso. Juntos, sin embargo, marcan un cambio de fase: la IA de código deja de tratarse como una extensión de editor que cada quien instala por su cuenta, y empieza a tratarse como cualquier otra pieza de infraestructura que necesita identidad, políticas y observabilidad.
+
+## El problema que resolvían mal las claves sueltas
+
+El patrón típico de adopción temprana era este: alguien en la organización obtenía una clave de API, la repartía por Slack o la ponía en una variable de entorno compartida, y el uso crecía de forma orgánica y opaca. Esto generaba tres fricciones concretas para cualquier responsable de plataforma o seguridad:
+
+Gestión de credenciales. Cada desarrollador necesitaba sus propias credenciales de nube para llegar al modelo a través de Bedrock o Vertex AI, lo que multiplicaba la superficie de rotación de secretos y hacía casi imposible revocar acceso a alguien que dejaba el equipo sin tocar media docena de sistemas.
+
+Gasto sin límites. Sin un tope por usuario, grupo u organización, el consumo de tokens escalaba con el entusiasmo del equipo, no con el presupuesto aprobado. La factura de fin de mes era la única señal de alerta, y llegaba demasiado tarde para actuar.
+
+Cero visibilidad. No había forma de responder preguntas básicas para justificar la inversión: ¿qué equipos se benefician más de acceso ampliado? ¿dónde está acelerando entregas el agente y dónde solo genera código que después hay que revisar dos veces? ¿cómo se debería repartir el presupuesto de tokens entre departamentos?
+
+## Qué resuelve el gateway
+
+El Claude apps gateway es, en esencia, un contenedor sin estado que la organización despliega en su propia infraestructura, respaldado por una base PostgreSQL. Sostiene las credenciales upstream hacia Bedrock, Google Cloud o Foundry, autentica a cada desarrollador contra el proveedor de identidad corporativo (Okta, Entra ID, lo que ya esté en uso), y reemplaza las claves individuales por sesiones de corta duración con inicio de sesión automático. En la práctica, esto significa que dar de baja a alguien es una operación en el IdP, no una caza de credenciales dispersas por media docena de repositorios y variables de entorno.
+
+Encima de esa capa de identidad se apoyan dos cosas que antes había que improvisar con hojas de cálculo: política centralizada por rol y topes de gasto diarios, semanales o mensuales, aplicables por organización, por grupo o por usuario individual. Y un detalle que suele importar a los equipos de seguridad: el gateway no envía tráfico de inferencia ni datos de uso a Anthropic salvo que se configure explícitamente para usar la API de Claude directamente; los datos de telemetría quedan bajo control del colector que la propia organización opera.
+
+## Qué agrega la observabilidad
+
+El gateway resuelve identidad y gasto. Lo que no responde por sí solo es si la inversión está funcionando, y ahí entra CloudWatch Coding Agent Insights. La idea es simple: los agentes de código ya emiten métricas en formato OpenTelemetry —tokens consumidos, sesiones, tiempo de ejecución, tasa de aceptación de sugerencias— y en lugar de dejarlas dispersas en logs que nadie revisa, CloudWatch las integra al mismo tablero donde un equipo de plataforma ya mira latencia de servicios o errores de despliegue.
+
+Eso habilita preguntas que antes eran imposibles de responder con datos: qué equipos se beneficiarían de acceso ampliado al agente, en qué flujos de trabajo el agente está acortando de verdad el ciclo de entrega, y cómo ajustar el presupuesto de tokens por departamento según uso real en lugar de estimaciones. El servicio está disponible en la mayoría de regiones comerciales de AWS y se factura con el esquema estándar de ingestión de métricas de CloudWatch, sin sorpresas de pricing dedicado.
+
+## Por qué esto importa más allá de quién use Claude Code
+
+Es tentador leer estos dos anuncios como noticias de producto de Anthropic y AWS y seguir de largo. Pero el patrón que describen —identidad centralizada, límites de gasto explícitos, telemetría comparable a la de cualquier otro servicio— es el mismo que atravesó cualquier tecnología empresarial cuando pasó de piloto a infraestructura estándar: pasó con los contenedores, pasó con las API internas, y ahora pasa con los agentes de código. Para un shop que viene de sistemas IBMi y todavía está evaluando si vale la pena dejar entrar un agente de IA a tocar código de producción, la señal es útil: la pregunta ya no es solo "¿el modelo escribe buen código?", sino "¿puedo auditar quién lo usó, cuánto costó y qué impacto tuvo?". Esa segunda pregunta es la que de verdad convence a un comité de seguridad o a un CFO.
+
+## Conclusión práctica
+
+Si tu organización está evaluando o ya tiene un agente de código en producción, hay tres cosas concretas que vale la pena revisar esta semana, sin esperar a un proyecto formal de gobierno de IA. Primero, confirmar si el proveedor que usás ya ofrece un mecanismo de SSO y sesiones de corta duración en lugar de claves de API repartidas manualmente; si no lo tiene, es una señal de que el gasto y el riesgo de credenciales van a seguir creciendo sin control. Segundo, definir topes de gasto explícitos por equipo antes de que el uso escale, no después de la primera factura inesperada. Y tercero, empezar a capturar telemetría básica de uso —aunque sea manual al principio— para poder responder, con datos y no con impresiones, si la herramienta está acelerando entregas o simplemente generando trabajo de revisión adicional. Ninguna de las tres requiere esperar a que el proveedor lo resuelva por vos: son decisiones de gobierno interno que se pueden tomar independientemente de qué agente termine eligiendo el equipo.

@@ -1,0 +1,40 @@
+---
+title: "IA para migrar RPG: lo que enseña el caso de AS/Forward"
+excerpt: "Un caso reciente de modernización de IBMi con IA deja una lección clara: lo que más importa no es el modelo que convierte el código, sino el análisis previo que le da contexto verificable."
+date: "2026-07-16"
+pillar: "ibmi"
+cover: "/covers/ia-para-migrar-rpg-caso-as-forward.jpg"
+draft: true
+---
+
+En abril de este año, la publicación especializada IT Jungle perfiló a una startup llamada Golden Path Digital y su producto AS/Forward: una herramienta que combina análisis de código RPG con conversión asistida por modelos de lenguaje. No es la primera propuesta que promete "modernizar RPG con IA" — el mercado ya tiene varias. Pero el detalle de cómo está construida vale la pena mirarlo de cerca, porque contradice la intuición más común sobre estos proyectos: que el valor está en el modelo que convierte el código. Según cuenta la empresa, el valor está en el paso anterior.
+
+## El problema real: RPG sin documentar y una fuerza de trabajo que se reduce
+
+Golden Path Digital nació de un problema concreto. Aaron Balentine, uno de sus dos fundadores, trabaja como ingeniero de IA en una maderera que corre sobre IBMi. Se encontró con una base de RPG mal documentada, sin una forma clara de extraer las reglas de negocio, en un momento en que —según describió a IT Jungle— eso ya era el mayor riesgo de negocio de la empresa. Aprendió RPG para intentar resolverlo, y de ahí salió la idea de AS/Forward.
+
+El diagnóstico que motiva el producto no es exclusivo de esa maderera: una fuerza de trabajo de desarrolladores RPG que se achica a medida que se jubila, combinada con código legado que nadie volvió a documentar. Es la misma tensión que ya toca este blog desde otro ángulo: la IA no resuelve la pérdida de contexto de negocio por sí sola, pero puede acelerar la primera lectura si se le da con qué trabajar.
+
+## Cómo funciona AS/Forward: primero el mapa, después el modelo
+
+La secuencia que describe Balentine es la parte más interesante del producto, más que el resultado final. AS/Forward no empieza mandándole el código RPG a un modelo de lenguaje. Empieza con una capa de ingestión que construye, según sus palabras, un "mapa de dependencias determinista": usa los comandos del propio sistema IBMi para extraer qué campos contiene cada programa, dónde imprime, qué archivos físicos y lógicos usa. Esa capa produce lo que el equipo llama análisis de "blast radius" (radio de impacto): antes de tocar una línea, se sabe qué se rompe si se cambia.
+
+Recién en la segunda etapa entra el modelo de lenguaje, conectado al código vía Model Context Protocol (MCP). AS/Forward admite varios proveedores —Claude, GPT, Gemini, Llama— y también Ollama para clientes que no quieren que su código salga hacia una nube de IA, corriendo modelos localmente sobre sus propias instancias Linux. El objetivo final del proceso completo puede ser dejar el RPG mejor documentado y en formato libre (Free Form RPG), o migrarlo a un lenguaje como Python, Java o C#, según lo que decida cada cliente.
+
+## Por qué el orden importa: alucinaciones y "ground truth"
+
+Lo que Balentine explicó en esa entrevista sobre las limitaciones actuales de los modelos es un dato honesto y poco habitual en el marketing de este tipo de productos: dice que, con el mismo input, el modelo produce un resultado similar en ocho de cada diez intentos, y en los otros dos se desvía por completo. En un programa que autoriza pagos o calcula intereses, ese margen de error no es aceptable sin un mecanismo de verificación.
+
+La respuesta de AS/Forward no es "usar un modelo mejor" —aunque reconoce que los modelos mejoraron mucho en su comprensión de RPG durante el último año—, sino invertir el esfuerzo en la capa determinista que precede a la IA. La idea es que el análisis de dependencias y el índice de búsqueda vectorial (usado como "búsqueda difusa" sobre el propio código, no sobre datos de IBMi) le den al modelo un terreno fijo del cual no debería desviarse. Es el mismo principio que ya vimos en otro contexto en este blog: un agente que propone una lectura verificable, con referencias concretas, en vez de una respuesta que hay que creerle por la seguridad con la que la escribe.
+
+## Un patrón que empieza a repetirse: watsonx Code Assistant for i
+
+AS/Forward no es un caso aislado. IBM viene en una dirección similar con watsonx Code Assistant for i, anunciado en mayo de 2025 y —según la página oficial de IBM consultada para esta nota— todavía en vista previa privada. El producto está construido sobre un modelo Granite de IBM ajustado específicamente para RPG e IBMi, y su primera función liberada, según el propio anuncio, es la explicación de código con conciencia de contexto; la generación de código y la creación de casos de prueba llegarían en etapas posteriores. Es un orden de prioridades parecido: primero entender, después generar.
+
+Que dos productos —uno de una startup de dos personas en Arkansas, otro del área de infraestructura de IBM— lleguen a una secuencia similar (documentar y mapear antes de convertir) no prueba que sea la única forma de hacerlo bien. Pero sí es una señal de hacia dónde se está moviendo la oferta de herramientas para este problema específico: no hacia "traducí este RPG a Python" como comando único, sino hacia sistemas que primero construyen contexto verificable y recién después dejan que el modelo genere.
+
+## Conclusión práctica
+
+Si tu equipo está evaluando una herramienta de este tipo —sea AS/Forward, watsonx Code Assistant for i o cualquier otra que aparezca este año—, la pregunta que vale la pena hacer primero no es "¿qué modelo usa?". Es "¿qué me muestra antes de tocar el código?". Pedí ver el mapa de dependencias o el análisis de impacto que se genera antes de la conversión, y verificá que sea reproducible: mismo input, mismo output, sin sorpresas. Si la herramienta no puede mostrarte ese paso intermedio de forma clara, lo que estás comprando es una apuesta a que el modelo acierte ocho de cada diez veces — y en un sistema que corre nómina o facturación, esa no es una apuesta razonable sin un humano que conozca el negocio revisando el resultado.
+
+*Fuentes: Alex Woodie, "Startup Seeks The 'Golden Path' for IBM i Modernization", IT Jungle, 13 de abril de 2026; IBM, "Introducing the upcoming IBM watsonx Code Assistant for i", 7 de mayo de 2025.*

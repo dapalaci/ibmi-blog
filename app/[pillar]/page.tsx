@@ -3,12 +3,23 @@ import type { Metadata } from "next";
 import { pillars, type PillarSlug } from "@/lib/config";
 import { getPostsByPillar } from "@/lib/posts";
 import { PostCard } from "@/components/PostCard";
-import { BridgeLine } from "@/components/BridgeLine";
 
 const pillarNumber: Record<PillarSlug, string> = {
   ibmi: "00",
   ia: "01",
   cloud: "02",
+};
+
+const pillarGlyph: Record<PillarSlug, string> = {
+  ibmi: ">",
+  cloud: "~",
+  ia: "*",
+};
+
+const pillarAccent: Record<PillarSlug, string> = {
+  ibmi: "text-accent",
+  cloud: "text-teal",
+  ia: "text-purple",
 };
 
 function isPillar(slug: string): slug is PillarSlug {
@@ -41,36 +52,57 @@ export default async function PillarPage({
   const posts = getPostsByPillar(pillar);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
-      <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-soft mb-8">
-        <span className="text-accent-ink">&gt;</span> pilar {pillarNumber[pillar]} · {meta.path}
-      </p>
+    <div>
+      <section className="mx-auto max-w-5xl px-6 pt-8 pb-16">
+        <div className="flex items-baseline justify-between gap-6 mb-10">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mute">
+            pilar {pillarNumber[pillar]} · {meta.path}
+          </p>
+          <span
+            aria-hidden="true"
+            className={
+              "font-[family-name:var(--font-display)] text-6xl md:text-7xl leading-none " +
+              pillarAccent[pillar]
+            }
+          >
+            {pillarGlyph[pillar]}
+          </span>
+        </div>
 
-      <h1
-        className="font-[family-name:var(--font-display)] font-semibold text-ink leading-[1.04] tracking-[-0.03em]"
-        style={{ fontSize: "clamp(2rem, 4.4vw, 3.25rem)" }}
-      >
-        {meta.label}
-      </h1>
+        <h1
+          className="font-[family-name:var(--font-display)] font-semibold text-ink leading-[1.02] tracking-[-0.025em]"
+          style={{ fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)" }}
+        >
+          {meta.label}
+        </h1>
 
-      <p className="mt-4 text-lg text-ink-soft leading-relaxed max-w-xl">
-        {meta.description}
-      </p>
+        <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed">
+          {meta.description}
+        </p>
+      </section>
 
-      <BridgeLine active={pillar} className="mt-10 mb-10" />
+      <section className="mx-auto max-w-6xl px-6 pb-20 border-t border-rule pt-16">
+        <div className="flex items-baseline justify-between mb-8">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl md:text-3xl font-semibold text-ink">
+            Entradas
+          </h2>
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mute">
+            {String(posts.length).padStart(3, "0")} artículos
+          </span>
+        </div>
 
-      <div className="border-t border-rule pt-2">
-        <h2 className="font-mono text-sm uppercase tracking-widest text-ink-soft pt-6 mb-2">
-          Entradas en este pilar
-        </h2>
         {posts.length === 0 ? (
-          <p className="py-10 text-ink-soft text-base">
+          <p className="py-16 text-ink-soft text-base">
             Todavía no hay posts en este pilar.
           </p>
         ) : (
-          posts.map((post) => <PostCard key={post.slug} post={post} />)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post, i) => (
+              <PostCard key={post.slug} post={post} index={i} />
+            ))}
+          </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
