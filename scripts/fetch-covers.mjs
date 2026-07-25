@@ -17,10 +17,10 @@ const COVERS_DIR = path.join(ROOT, "public", "covers");
 const queries = [
   { slug: "arquitectura-hibrida-ibmi-nube", q: "server room datacenter" },
   { slug: "exponer-rpg-como-api-rest", q: "mainframe computer terminal" },
-  { slug: "gobernanza-agentes-ia-codigo-empresa", q: "control room dashboard" },
-  { slug: "ia-para-leer-rpg-sin-documentacion", q: "old code reading" },
-  { slug: "ia-para-migrar-rpg-caso-as-forward", q: "bridge construction engineering" },
-  { slug: "ibm-bob-premium-package-para-i", q: "toolbox workshop" },
+  { slug: "gobernanza-agentes-ia-codigo-empresa", q: "network operations center" },
+  { slug: "ia-para-leer-rpg-sin-documentacion", q: "vintage printout code" },
+  { slug: "ia-para-migrar-rpg-caso-as-forward", q: "software developer laptop" },
+  { slug: "ibm-bob-premium-package-para-i", q: "unix command line" },
   { slug: "power-s1112-entrada-power11-ibmi", q: "server rack hardware" },
 ];
 

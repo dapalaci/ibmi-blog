@@ -27,7 +27,7 @@ export default function CreditosPage() {
         >
           Créditos de imágenes
         </h1>
-        <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed">
+        <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed text-justify hyphens-auto">
           Los covers de los posts vienen de{" "}
           <a
             href="https://openverse.org"

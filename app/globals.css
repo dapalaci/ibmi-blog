@@ -79,12 +79,21 @@ body {
 .prose-post p {
   margin-bottom: 1.35rem;
   color: var(--ink);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 .prose-post ul, .prose-post ol {
   margin: 0 0 1.25rem 1.25rem;
 }
 .prose-post li {
   margin-bottom: 0.4rem;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.prose-post blockquote {
+  text-align: left;
 }
 .prose-post li::marker {
   color: var(--accent);

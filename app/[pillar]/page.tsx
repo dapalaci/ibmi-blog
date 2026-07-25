@@ -76,7 +76,7 @@ export default async function PillarPage({
           {meta.label}
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed">
+        <p className="mt-6 max-w-2xl text-lg text-ink-soft leading-relaxed text-justify hyphens-auto">
           {meta.description}
         </p>
       </section>

@@ -34,7 +34,7 @@ export default function Home() {
           Modernizar sin borrar la{" "}
           <em className="not-italic text-accent">memoria del sistema</em>.
         </h1>
-        <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft">
+        <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft text-justify hyphens-auto">
           {site.description}
         </p>
       </section>

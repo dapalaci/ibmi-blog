@@ -78,7 +78,7 @@ export default async function PostPage({
           {post.title}
         </h1>
 
-        <p className="mt-6 max-w-2xl text-xl text-ink-soft leading-relaxed">
+        <p className="mt-6 max-w-2xl text-xl text-ink-soft leading-relaxed text-justify hyphens-auto">
           {post.excerpt}
         </p>
       </header>
