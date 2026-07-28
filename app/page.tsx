@@ -23,20 +23,28 @@ export default function Home() {
 
   return (
     <div>
-      <section className="mx-auto max-w-5xl px-6 pt-8 pb-24">
-        <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mute mb-8">
-          puente/i · notas técnicas
-        </p>
-        <h1
-          className="font-[family-name:var(--font-display)] font-semibold text-ink leading-[1.02] tracking-[-0.025em]"
-          style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
-        >
-          Modernizar sin borrar la{" "}
-          <em className="not-italic text-accent">memoria del sistema</em>.
-        </h1>
-        <p className="mt-8 max-w-2xl text-lg leading-relaxed text-ink-soft text-justify hyphens-auto">
-          {site.description}
-        </p>
+      <section
+        className="relative w-full h-96 md:h-[500px] flex items-center justify-center bg-cover bg-center bg-no-repeat overflow-hidden"
+        style={{
+          backgroundImage: "url(/covers/hero-datacenter.jpg)",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+          <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/70 mb-6">
+            puente/i · notas técnicas
+          </p>
+          <h1
+            className="font-[family-name:var(--font-display)] font-semibold text-white leading-[1.02] tracking-[-0.025em]"
+            style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+          >
+            Modernizar sin borrar la{" "}
+            <em className="not-italic text-teal-300">memoria del sistema</em>.
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80 text-center mx-auto hyphens-auto">
+            {site.description}
+          </p>
+        </div>
       </section>
 
       {featured.length > 0 && (
