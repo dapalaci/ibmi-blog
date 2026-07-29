@@ -8,7 +8,7 @@ type CoverCredit = (typeof manifest)[number];
 export const metadata: Metadata = {
   title: "Créditos de imágenes",
   description:
-    "Atribución de las imágenes de portada usadas en puente /i. Todas provienen de Openverse y mantienen sus licencias Creative Commons originales.",
+    "Atribución de las imágenes de portada usadas en transformación /i. Todas provienen de Openverse y mantienen sus licencias Creative Commons originales.",
 };
 
 export default function CreditosPage() {
@@ -19,7 +19,7 @@ export default function CreditosPage() {
     <div>
       <section className="mx-auto max-w-4xl px-6 pt-8 pb-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mute mb-8">
-          puente/i · atribución
+          transformación/i · atribución
         </p>
         <h1
           className="font-[family-name:var(--font-display)] font-semibold text-ink leading-[1.04] tracking-[-0.02em]"

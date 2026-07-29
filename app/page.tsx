@@ -32,7 +32,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
           <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-white/70 mb-6">
-            puente/i · notas técnicas
+            transformación/i · notas técnicas
           </p>
           <h1
             className="font-[family-name:var(--font-display)] font-semibold text-white leading-[1.02] tracking-[-0.025em]"

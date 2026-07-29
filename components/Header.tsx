@@ -22,7 +22,7 @@ export function Header() {
               &gt;
             </span>
             <span className="font-[family-name:var(--font-display)] text-base font-semibold text-ink">
-              puente<span className="text-ink-soft">/i</span>
+              transformación<span className="text-ink-soft">/i</span>
             </span>
           </Link>
           <PillarNav postPillarMap={postPillarMap} />

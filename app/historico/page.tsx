@@ -6,7 +6,7 @@ import { PostCardCompact } from "@/components/PostCardCompact";
 export const metadata: Metadata = {
   title: "Histórico",
   description:
-    "Todas las entradas publicadas en puente /i, agrupadas por año y ordenadas de la más reciente a la más antigua.",
+    "Todas las entradas publicadas en transformación /i, agrupadas por año y ordenadas de la más reciente a la más antigua.",
 };
 
 function groupByYear(posts: PostSummary[]): Map<string, PostSummary[]> {
@@ -28,7 +28,7 @@ export default function HistoricoPage() {
     <div>
       <section className="mx-auto max-w-4xl px-6 pt-8 pb-12">
         <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-ink-mute mb-8">
-          puente/i · archivo completo
+          transformación/i · archivo completo
         </p>
         <div className="flex items-baseline justify-between gap-6">
           <h1

@@ -1,5 +1,5 @@
 export const site = {
-  name: "puente /i",
+  name: "transformación /i",
   url: "https://ibmi-blog.pages.dev",
   tagline: "Modernización IBMi, nube e IA aplicada al desarrollo.",
   description:
