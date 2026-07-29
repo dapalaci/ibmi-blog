@@ -80,15 +80,26 @@ Rendereá el `.excalidraw` a PNG y guardalos ambos en `public/diagrams/`. En el 
 </Figure>
 ```
 
-## Deploy
+## Git
 
-Cloudflare Pages, servido como sitio estático puro (`out/` generado por `next build`).
+- Rama `main`: producción. Cada push a `main` dispara un build en Cloudflare Pages.
+- Ramas `feat/*` para cambios grandes que no se quieren publicar de inmediato (ej. `feat/dark-magazine`).
+- Mensajes de commit en español, formato `tipo: descripción breve` — tipos usados en el historial: `content` (posts, copy del sitio) y `feat` (funcionalidad nueva). Cambios puntuales de diseño/ajustes van sin prefijo.
+- No hay revisión por PR en este repo: los posts nuevos se commitean y pushean directo a `main` una vez que el frontmatter es válido (`draft: false`).
+
+## Despliegues e integración continua
+
+Cloudflare Pages, conectado directo al repo de GitHub. No hay workflows de GitHub Actions
+en `.github/` — el build corre del lado de Cloudflare en cada push a `main`, sirviendo el
+sitio como estático puro (`out/` generado por `next build`).
 
 - Build command: `npm run build`
 - Output directory: `out`
 - Node version: 20+
-
-El script `build` también elimina `out/hero-lab/` para que esa ruta responda 404 en producción.
+- El script `build` elimina `out/hero-lab/` antes de publicar, así que esa ruta de pruebas
+  nunca llega a producción aunque exista en el árbol de `app/`.
+- No hay ambiente de staging separado; para previsualizar cambios antes de pushear, correr
+  `npm run dev` en local.
 
 ## Covers de posts
 
