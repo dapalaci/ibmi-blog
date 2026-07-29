@@ -1,0 +1,39 @@
+---
+title: "Lo que la IA le está sacando a los ingenieros junior (y por qué la factura llega después)"
+excerpt: "Un estudio de la Universidad Nacional de Seúl con 14 ingenieros surcoreanos describe qué pasa cuando la IA generativa absorbe la depuración y los bugs menores que antes formaban a los desarrolladores junior. La productividad de este trimestre no muestra el costo: lo muestra la ausencia de criterio senior dentro de cinco años."
+date: "2026-07-28"
+pillar: "ia"
+draft: false
+---
+
+Llega un ticket para un bug chico. Si se lo asignás al junior del equipo, esperás un día, revisás algo que funciona a medias y te sentás a explicarle qué salió mal. Si se lo describís a un agente de IA, el parche se mergea antes del almuerzo. La segunda opción gana en cualquier métrica que tu equipo reporte este trimestre. También elimina el único entrenamiento que ese junior iba a recibir, en todas las empresas que toman la misma decisión la misma mañana. Ese es el punto de partida de un estudio publicado esta semana por investigadores de la Universidad Nacional de Seúl, basado en entrevistas a 14 ingenieros de software surcoreanos —la mitad seniors que deciden hacia dónde va el trabajo, la otra mitad estudiantes a punto de entrar a un mercado laboral que dejó de contratarlos—. Corea es un caso de prueba útil: el uso de IA relacionado al trabajo llega ahí al 51,8%, casi el doble que en Estados Unidos, y varias de sus grandes tecnológicas ya dejaron de reclutar juniors de forma abierta.
+
+## Lo que se recorta no es el trabajo, es la retroalimentación
+
+Un fundador con más de doce años como desarrollador describió qué pasó después de recortar su plantilla junior: "Dejamos ir a muchos ingenieros junior en la segunda mitad del año pasado. Pero no hubo ningún impacto." Y ante la pregunta de qué podía aportar un junior que la herramienta no aportara, contestó: "¿Qué puede hacer un ingeniero junior mejor que una suscripción a Claude? No creo que haya nada." El mismo fundador, minutos antes en la misma entrevista, había descrito su propio arranque de carrera: escribir código según instrucciones, depurar todos los días, revisar y probar lo que volvía del control de calidad —"el trabajo de base del desarrollo", en sus palabras—, que según él fue lo que lo llevó a donde está hoy. El estudio marca la contradicción sin subrayarla: la depuración y la corrección de bugs menores nunca se les asignó a los juniors porque fueran valiosas en sí mismas, sino porque hacerlas mal, y tener después a un senior explicando por qué estaban mal, es el mecanismo que produce criterio. Ese mecanismo es exactamente lo que las herramientas absorbieron.
+
+## Generar es barato, verificar es caro
+
+Un senior de una empresa mediana de videojuegos lo resume en una frase que cualquiera que revise código generado por IA va a reconocer: "El costo de generar código es tan barato usando IA generativa, pero el costo de verificar código es tan caro." La verificación es hoy el insumo escaso, y se produce casi exclusivamente por haberse equivocado antes en formas que costaron algo. El circuito que generaba esa experiencia —el ticket chico, el error, la corrección explicada por un senior— es justo el que dejó de asignarse.
+
+Los propios estudiantes entrevistados nombran la carencia en los mismos términos que sus seniors. Uno dijo que no sabe qué no hacer, porque solo vio los ejemplos buenos. Otro fue más directo: "No sé lo que no sé." Un senior de una empresa de re-commerce llegó al mismo lugar desde el lado de la contratación: "La razón por la que a alguien se lo llama senior es que sabe cómo NO se debe hacer el trabajo, pero ahora los juniors no pueden aprender de los malos ejemplos."
+
+## La universidad tampoco exige ya el esfuerzo real
+
+La parte académica del problema corre por las curvas de calificación. Un estudiante contó que dejó de resolver los trabajos prácticos sin ayuda: "Todos menos yo usaban GPT, así que todos menos yo sacaban notas casi perfectas. Ya no tenía la libertad de resolver los ejercicios por mi cuenta, cometiendo errores en el camino, así que terminé usándolo yo también." El mismo estudiante cursó dos materias del mismo área, una donde los trabajos se podían resolver con un chatbot y otra donde no: la nota final le dio igual en las dos, pero estudió mucho más en la que no podía usar IA. El certificado queda idéntico en ambos casos, que es justamente la parte que debería preocupar a cualquiera que lea un currículum hoy. Las publicaciones de empleo IT en Corea cayeron 43% entre 2023 y 2024, y en Estados Unidos el empleo de programadores cayó 27,5% en un período similar, según cifras citadas en el estudio.
+
+## Dos industrias ya escribieron esta regla, el software todavía no
+
+El estudio traza un paralelo que vale la pena mirar de cerca. La aviación resolvió un problema parecido cuando maduró la automatización de cabina: la Alerta de Seguridad para Operadores 13002 de la FAA exige a las aerolíneas preservar oportunidades de vuelo manual para que los pilotos no pierdan la habilidad que el piloto automático ejerce por ellos. La regulación nuclear estadounidense exige algo equivalente bajo 10 CFR 55.59: entrenamiento periódico en simulador para emergencias que la operación automatizada de rutina nunca ejercita. Las dos reglas existen porque un regulador decidió que mantener la habilidad era demasiado importante como para dejarlo en manos de quien arma el cronograma esa semana. El desarrollo de software no tiene un equivalente, y todavía no se hizo la pregunta de si lo necesita.
+
+Hay, dentro del mismo estudio, una excepción que confirma el patrón: el único senior que reportó que el trabajo junior casi no cambió trabajaba en una empresa grande con un pipeline de onboarding formal. La absorción avanzó más rápido justo donde nadie tenía escrito cómo debía desarrollarse un junior.
+
+## Por qué esto le importa a un shop de IBMi
+
+Este blog viene señalando hace semanas la misma tensión desde otro ángulo: usar IA para leer RPG sin documentación o para acelerar una migración con AS/Forward solo funciona si hay alguien capaz de verificar lo que la IA propone. Los equipos de IBMi ya arrastran una brecha generacional conocida —programadores RPG senior llegando a la jubilación sin un reemplazo entrenado—. Si la norma en el resto de la industria pasa a ser "saltear el entrenamiento junior porque la IA hace el trabajo de base", esa brecha no se cierra con más herramientas: se profundiza, porque el juicio necesario para auditar lo que un agente modernizó tampoco se está formando en ningún lado.
+
+## Conclusión práctica
+
+Si liderás un equipo de desarrollo —en IBMi o en cualquier stack— la lección de este estudio no es dejar de usar IA para bugs y tareas rutinarias; es dejar de asumir que ese entrenamiento va a pasar solo. Diseñá a propósito una porción del trabajo de verificación como tarea de aprendizaje, no como subproducto de a quién le tocó el ticket: el modelo de onboarding que describe la ingeniera de re-commerce en el estudio —una tarea trivial de punta a punta (encontrar el error, corregirlo, pasar por review, llegar a producción) con cada vez menos andamiaje— cuesta poco y deja algo verificable en manos de quien lo hizo. Tomá también la analogía regulatoria en serio: si la aviación y la energía nuclear necesitaron una regla externa para no perder una habilidad que la automatización rutinaria no ejercita, vale la pena preguntarte, dentro de tu propio equipo, qué regla interna vas a poner vos antes de que alguien más te obligue a ponerla.
+
+*Fuente: Sinisa Markovic, "AI took more than junior developer jobs and the bill comes later", Help Net Security, 28 de julio de 2026, basado en el estudio de la Universidad Nacional de Seúl disponible en arXiv:2607.17067.*
