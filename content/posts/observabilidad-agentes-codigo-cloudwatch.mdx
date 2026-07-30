@@ -1,0 +1,42 @@
+---
+title: "Lo que no se mide, no se gobierna: la nueva observabilidad para agentes de código"
+excerpt: "AWS lanzó CloudWatch Coding Agent Insights para medir tokens, latencia y aprobaciones de Claude Code, Codex y Copilot. La pregunta de fondo no es técnica: es si tu equipo sabe qué están haciendo sus agentes."
+date: "2026-07-29"
+pillar: "ia"
+draft: true
+---
+
+El 20 de julio, AWS anunció CloudWatch Coding Agent Insights: un panel dedicado que recolecta métricas de OpenTelemetry emitidas por Claude Code, OpenAI Codex y GitHub Copilot, y las muestra segmentadas por organización, equipo, centro de costo y usuario. No es una herramienta que escriba código ni que revise pull requests. Es, en esencia, un contador de lo que los agentes están consumiendo y haciendo mientras trabajan.
+
+Que este anuncio llegue casi dos años después de que los agentes de código pasaran de completar líneas a ejecutar tareas completas de forma autónoma dice algo importante: la parte de generar código dejó de ser el cuello de botella. El cuello de botella ahora es saber qué pasó.
+
+## Qué mide exactamente
+
+Coding Agent Insights no es un dashboard genérico de uso de IA. Los datos que expone son específicos del ciclo de vida de un agente trabajando sobre una base de código:
+
+- **Consumo de tokens** por sesión, equipo y modelo, con el costo asociado.
+- **Latencia por turno**: cuánto tarda el agente en responder cada paso de una tarea, útil para detectar cuándo una sesión se está atascando en un bucle de razonamiento largo.
+- **Llamadas a herramientas** (tool calls): cuántas veces el agente ejecutó un comando, leyó un archivo, corrió un test o hizo una búsqueda, y con qué frecuencia esas llamadas fallan.
+- **Solicitudes de API y aprobaciones**: cuántas acciones requirieron luz verde humana antes de ejecutarse, y cuántas se aprobaron sin revisión real.
+
+La integración con Claude Code, por ejemplo, se hace a través del gateway de apps de Claude para AWS, sin necesidad de instrumentar cada sesión a mano. Los equipos que ya administran políticas de Claude Code de forma centralizada pueden activar la telemetría a nivel de organización y empezar a ver datos agregados casi de inmediato.
+
+## Por qué esto importa más allá de AWS
+
+Es tentador leer este lanzamiento como una noticia de infraestructura de nicho. No lo es. Es la confirmación de un problema que cualquier equipo que ya usa agentes de código a diario reconoce, aunque no lo haya puesto en estos términos: nadie sabe cuánto cuesta realmente un agente, ni cuántas de sus acciones se aprueban sin que un humano las mire con atención.
+
+Pensemos en un caso concreto. Un equipo de cinco personas adopta un agente de código para acelerar refactors y generación de tests. A los tres meses, la factura de tokens sube sin que nadie tenga una explicación clara. Sin telemetría, las hipótesis son puro folclore de pasillo: "seguro es fulano que lo deja corriendo toda la noche", "debe ser ese repo grande que tiene contexto enorme". Con métricas por usuario y por sesión, la pregunta deja de ser una sospecha y se convierte en un dato: quién, cuándo, en qué tarea, con qué modelo.
+
+El mismo razonamiento aplica al riesgo, no solo al costo. La métrica de aprobaciones es la más incómoda de las cuatro, y también la más útil. Si un equipo descubre que el 95% de las acciones de su agente se aprueban con un clic reflejo, sin que nadie lea el diff, esa cifra no habla del agente: habla de un proceso de revisión que dejó de ser revisión hace tiempo. Es el mismo patrón de riesgo que ya se ve en shops que adoptan agentes para tocar código legado sin un ingeniero humano que confirme cada cambio antes de que llegue a producción.
+
+## Cómo se traduce esto en un flujo de trabajo real
+
+No hace falta usar CloudWatch específicamente para aplicar la idea. Lo que vale la pena adoptar, con o sin este panel puntual, son tres prácticas concretas:
+
+1. **Instrumentar antes de escalar.** Si tu organización va a pasar de "dos personas probando un agente" a "todo el equipo de plataforma lo usa a diario", activa la telemetría desde el primer día de esa expansión, no seis meses después cuando ya no hay forma de reconstruir el historial de uso.
+2. **Fijar un umbral de aprobación real, no cosmético.** Una acción del agente que modifica un archivo fuente, corre una migración de base de datos o hace un commit debería tener un criterio explícito de cuándo se aprueba sin revisión y cuándo exige que un humano lea el diff completo. Medir cuántas aprobaciones caen en cada categoría permite detectar cuando ese criterio se está erosionando.
+3. **Revisar latencia como señal de calidad, no solo de performance.** Un turno anormalmente largo en una tarea simple suele indicar que el agente entró en un ciclo de intentos fallidos —una llamada a herramienta que falla y se reintenta, un archivo que no encuentra, un test que no logra hacer pasar—. Antes de optimizar para "que responda más rápido", vale la pena mirar por qué tardó tanto en primer lugar.
+
+## La conclusión práctica
+
+La observabilidad de agentes de código no es una capa opcional que se agrega cuando el equipo ya es grande. Es, cada vez más, el mecanismo que separa a los equipos que pueden explicar con datos qué hace su IA de los que solo pueden confiar en que "hasta ahora no rompió nada". CloudWatch Coding Agent Insights es una señal de hacia dónde va la industria, no la única solución posible: el punto de fondo es que si tu equipo usa agentes de código todos los días y no puede responder con datos cuánto cuestan, cuánto tardan y cuántas de sus acciones pasan sin revisión humana real, esa es la primera brecha que hay que cerrar antes de seguir escalando su uso.
