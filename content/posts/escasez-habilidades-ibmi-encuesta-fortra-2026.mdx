@@ -1,0 +1,33 @@
+---
+title: "Por primera vez en nueve años, la ciberseguridad ya no es la mayor preocupación de un shop IBM i"
+excerpt: "La encuesta anual de Fortra a 315 organizaciones IBM i muestra un cambio de fondo: la escasez de habilidades desplazó a la ciberseguridad del primer lugar. Los números explican por qué IBM apuesta tan fuerte a Bob y por qué VS Code ya superó a RDi como herramienta de desarrollo."
+date: "2026-07-31"
+pillar: "ibmi"
+draft: true
+---
+
+Desde 2017, si le preguntabas a un shop IBM i cuál era su mayor dolor de cabeza, la respuesta casi siempre era la misma: ciberseguridad. Fortra viene midiendo esto todos los años en su [IBM i Marketplace Survey](https://power.fortra.com/resources/guides/it-initiatives-trends-2026-ibm-i-marketplace-survey-results), y en 2026, con 315 respuestas recolectadas a fines de 2025, ese primer lugar cambió de dueño por primera vez en nueve años. La escasez de habilidades IBM i pasó a ser la preocupación número uno, con un 69% de menciones, subiendo doce puntos respecto del 60% del año anterior. La ciberseguridad, mientras tanto, cayó del 79% en 2024 al 77% en 2025 y ahora al 64%: sigue siendo alta, pero ya no lidera.
+
+Es un dato que cualquiera que trabaje cerca de un sistema IBM i ya intuía, pero verlo confirmado con series de siete años de historia le da otro peso. Y trae una segunda cifra que conviene leer junto a la primera: la preocupación por IA y machine learning saltó del 30% al 42% en un solo año, y venía de apenas 7% cuando Fortra empezó a preguntar por esto en 2021. Las dos curvas se cruzan por una razón concreta: la IA es, hoy, la respuesta que la industria está construyendo para el problema de las habilidades.
+
+## Por qué se invirtió el orden
+
+El motivo detrás de la escasez no es ningún misterio. La comunidad IBM i está sobrerrepresentada por generación baby boomer, y los más jóvenes de esa generación ya cumplieron 62 años, la edad en la que empieza a habilitarse el retiro con jubilación completa en Estados Unidos. Steve Will, arquitecto jefe de IBM i, lo resumió sin vueltas en el webinar donde Fortra presentó los resultados: "Las habilidades de IBM i siempre son más difíciles de conseguir que otras habilidades. Es una de las razones por las que tratamos de simplificar todo lo posible en esta plataforma."
+
+Esa frase no es casual: apunta directo a Bob, el asistente de código agéntico que IBM viene desarrollando y que llega al mercado en 2026. La lógica de IBM es explícita: si conseguir a alguien con diez años de experiencia en RPG es cada vez más difícil, la alternativa es una herramienta que le permita a cualquier desarrollador razonablemente capaz trabajar sobre la plataforma sin ese bagaje. No reemplaza la experiencia senior, pero baja la barrera de entrada lo suficiente como para que la escasez de personal deje de ser un cuello de botella total.
+
+La ciberseguridad, en cambio, bajó de posición pero no de importancia real. Tom Huntington, VP de servicios técnicos de Fortra, lo planteó como una señal de que las organizaciones sienten que ya atendieron lo básico: MFA nativo (agregado en IBM i 7.6 para Power10 en adelante), exit points, logs de seguridad, transferencia segura de archivos. Aun así, la encuesta muestra que solo el 42% de los respondientes tiene antivirus y protección contra ransomware activados, y que la falta de presupuesto para proyectos de seguridad subió de 23% a 30% como principal obstáculo. La sensación de "ya lo resolvimos" conviene tomarla con pinzas.
+
+## Lo que cambia en el día a día del desarrollador
+
+Los datos de herramientas de desarrollo son, para mí, el capítulo más interesante del reporte porque muestran el cambio en la práctica, no solo en la percepción. Visual Studio Code superó por primera vez a Rational Developer for i (RDi) como herramienta de desarrollo: 58% contra 57%. El histórico Application Development Tool Set (SEU, PDM y compañía) sigue en primer lugar con 74%, porque los desarrolladores más experimentados siguen ahí, pero la tendencia de adopción es clara.
+
+En lenguajes, RPG y SQL siguen liderando el desarrollo nuevo, aunque ambos bajaron levemente. Lo llamativo es Java, que se mantuvo por encima del 40% durante una década y ahora cayó al 32%, mientras que Python sigue creciendo, empujado por su rol como lenguaje preferido para desarrollo de IA. Y en herramientas open source, Apache Tomcat pasó de 26% a 38% de adopción, en línea con el foco en modernización de aplicaciones, mientras Jenkins, Ansible, Git y Bash aparecen cada vez con más frecuencia — la señal más clara de que las prácticas DevOps ya llegaron a los flujos de trabajo de IBM i, no solo a los de la nube pública.
+
+Un ejemplo concreto de por dónde va esto: un shop que hoy modernice un programa RPG en formato libre puede exponerlo con RPG Open Access y las capacidades HTTP/JSON reforzadas de IBM i 7.6 TR1, versionarlo en Git, correr sus pruebas con un pipeline en Jenkins y desplegarlo con Ansible — todo sin salir del ecosistema Power. Hace cinco años, ese mismo flujo hubiera requerido convencer a la gerencia de que "eso no es cómo se trabaja en IBM i". Hoy es, sencillamente, cómo se trabaja.
+
+## Qué hacer con estos números esta semana
+
+Si administrás o lideras un equipo IBM i, la encuesta deja tres cosas accionables. Primero, tratar la fuga de conocimiento como un proyecto con presupuesto propio, no como una preocupación abstracta: documentar procesos batch, dependencias entre RPG y CL, y flujos de negocio antes de que la persona que los conoce se jubile, no después. Segundo, evaluar seriamente herramientas como Bob u otros asistentes de código no como reemplazo del talento senior sino como una forma de ampliar el pool de gente que puede tocar el sistema con seguridad razonable. Y tercero, no confundir "bajó el ranking" con "está resuelto" en materia de seguridad: si tu organización todavía no tiene antivirus, MFA o un plan de recuperación ante ransomware, seguís en el 40-60% que la encuesta identifica como expuesto, sin importar qué tan bien esté el resto de la industria.
+
+La foto de 2026 es la de una plataforma que dejó de discutir si moderniza o no, y empezó a discutir con qué velocidad de reemplazo generacional lo hace. Los números de Fortra no predicen el futuro, pero sí marcan con bastante precisión hacia dónde ya se está moviendo el presente.
