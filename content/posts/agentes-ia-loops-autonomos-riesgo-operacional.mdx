@@ -1,0 +1,39 @@
+---
+title: "De responder un prompt a operar solos: lo que cambia cuando un agente de código trabaja en loop"
+excerpt: "Los agentes de código ya no esperan una instrucción por paso: encadenan decisiones durante horas sin que un humano mire cada una. Para un shop que corre sistemas legados, eso cambia qué hay que controlar y cuándo."
+date: "2026-08-03"
+pillar: "ia"
+draft: true
+---
+
+Durante los primeros años de agentes de código con IA, el patrón de uso era predecible: el desarrollador escribía un prompt, el agente proponía un cambio puntual —una función, un archivo, un diff acotado— y el humano lo revisaba antes de aceptarlo. Ese ciclo corto es el que la mayoría de los equipos todavía tiene en la cabeza cuando piensa en "usar IA para programar". Pero la forma en que estas herramientas se usan hoy ya se corrió de ese modelo: en vez de responder a una instrucción por vez, cada vez es más común dejar a un agente trabajando en un objetivo amplio —"migrá este módulo", "arreglá los tests que fallan en el pipeline", "actualizá las dependencias de este repo"— y que sea el propio agente el que decida, durante minutos u horas, qué archivo leer a continuación, qué comando ejecutar, qué prueba correr y qué cambio hacer, encadenando docenas de pasos sin que nadie mire cada uno.
+
+Ese cambio no es solo una cuestión de productividad. Es un cambio de qué tipo de control tiene sentido aplicar, y en qué momento aplicarlo.
+
+## Qué significa "operar en loop" en la práctica
+
+Un agente en modo de ejecución encadenada no ejecuta una acción y espera aprobación explícita antes de la siguiente. Recibe un objetivo, arma un plan implícito, y va tomando decisiones intermedias por su cuenta: leer un archivo para entender contexto, correr un comando de terminal para ver si algo compila, editar tres archivos relacionados porque el primer cambio rompió los otros dos, volver a correr los tests, ajustar de nuevo. Cada uno de esos pasos individuales puede parecer razonable visto en aislado. El problema es que nadie está mirando la secuencia completa mientras ocurre, sino recién al final, cuando el agente reporta "listo" y presenta un resumen.
+
+Para un equipo que trabaja sobre sistemas nuevos, con buena cobertura de tests y control de versiones estricto, ese modelo puede funcionar razonablemente bien: si el agente se equivoca, el pull request lo expone y el CI lo detiene. El problema aparece cuando ese mismo patrón se traslada a un entorno con sistemas legados, donde las salvaguardas automáticas suelen ser más débiles: menos cobertura de tests, cambios que tocan objetos compartidos entre varios programas, procesos batch que se disparan por horario y no por un pipeline que alguien mira en tiempo real.
+
+## Un ejemplo concreto: la migración que se sale del alcance
+
+Pensemos en un caso realista para un shop IBMi. Se le pide a un agente que modernice un programa RPG puntual: extraer su lógica de validación a un servicio reutilizable, sin tocar el comportamiento existente. Un agente que trabaja en loop, al leer el programa, puede detectar que una copybook compartida por ese programa y otros diez tiene un campo mal nombrado, y decidir "corregirlo" como parte del mismo trabajo, porque desde su perspectiva es una mejora razonable dentro del objetivo general de modernizar el código. El cambio en la copybook compila. Los tests del programa original pasan. Lo que el agente no tiene forma de saber —porque nadie se lo dijo y no está en el alcance que le dieron— es que otros nueve programas dependen de ese campo con el nombre original, y que tres de ellos no tienen test automatizado que detecte la ruptura.
+
+Esto no es un fallo de "inteligencia" del modelo. Es una consecuencia directa de darle a un agente un objetivo amplio y dejar que resuelva el camino solo, en un entorno donde el radio de impacto de un cambio no siempre es visible desde el archivo que se está editando.
+
+## Los puntos donde de verdad hay que poner un control
+
+No hace falta prohibir el trabajo autónomo prolongado para evitar este tipo de problema. Hace falta decidir, de forma explícita, en qué momentos el loop se detiene y pide confirmación humana antes de seguir. Los puntos que más rinden son estos:
+
+**Alcance declarado, no implícito.** Antes de lanzar una tarea larga, listar explícitamente qué archivos y objetos puede tocar el agente y cuáles quedan fuera, en lugar de asumir que "modernizar este programa" implica solo ese programa. Esto es más fácil de hacer en shops IBMi que en muchos entornos modernos, porque el mapa de dependencias entre programas, copybooks y archivos físicos suele estar razonablemente bien documentado o es reconstruible con herramientas de análisis de impacto ya existentes.
+
+**Comandos que ejecutan cambios reales, no solo lectura.** Correr un comando para compilar o correr un test es distinto de correr un comando que modifica un archivo físico, dispara un job o toca una definición de base de datos. Cualquier flujo de trabajo con agentes debería distinguir entre estas dos categorías y exigir confirmación explícita antes de la segunda, incluso si eso interrumpe el loop autónomo.
+
+**Checkpoints intermedios, no solo revisión al final.** Si una tarea se estima en más de veinte o treinta minutos de trabajo autónomo, tiene sentido pedirle al agente que reporte su plan y su progreso a mitad de camino, no solo al terminar. Eso permite detectar un desvío de alcance —como el ejemplo de la copybook— cuando todavía es barato corregirlo, en lugar de descubrirlo en el diff final de doscientas líneas.
+
+**Tratar al agente como un colaborador nuevo sin contexto institucional, no como alguien que ya sabe lo que no se debe tocar.** Un desarrollador con seis meses en la empresa sabe, casi por instinto, qué archivos son "sensibles" incluso sin que nadie se lo haya explicado formalmente. Un agente no tiene ese instinto: solo tiene lo que está en el prompt, en el repositorio, y en lo que pueda inferir de la estructura del código. Cualquier restricción que dependa de sentido común no escrito no va a sostenerse.
+
+## Conclusión práctica
+
+Si tu equipo ya deja agentes de código trabajando sin supervisión paso a paso —y cada vez es más probable que así sea, aunque no lo llames formalmente "modo autónomo"— la pregunta que vale la pena hacerse esta semana no es si el agente es lo bastante bueno para hacerlo, sino si el alcance de cada tarea está declarado por escrito antes de lanzarla, si los comandos que modifican estado real requieren un paso de confirmación distinto de los que solo leen o prueban, y si hay al menos un checkpoint intermedio en tareas largas. Ninguna de esas tres cosas depende del proveedor del agente ni de qué tan avanzado sea el modelo: son decisiones de proceso que un equipo puede implementar mañana mismo, y son, en la práctica, la diferencia entre un agente que ahorra tiempo y uno que un día corrige silenciosamente el archivo equivocado.
