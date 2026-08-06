@@ -1,0 +1,45 @@
+---
+title: "Conectar RPG/COBOL en IBMi con WhatsApp: la arquitectura que sí funciona"
+excerpt: "IBMi no habla WhatsApp y nunca lo va a hablar. La integración real pasa por una capa intermedia que ya deberías tener si expusiste RPG como API — acá está el patrón completo y dónde se complica en la práctica."
+date: "2026-08-05"
+pillar: "ibmi"
+draft: true
+---
+
+La pregunta llega siempre con la misma estructura: "¿se puede mandar un WhatsApp desde un programa RPG?". La respuesta corta es sí. La respuesta útil es que RPG y COBOL nunca van a hablar con WhatsApp directamente, y no deberían intentarlo — la integración vive en la misma capa intermedia que [ya cubrimos acá](/blog/exponer-rpg-como-api-rest) cuando hablamos de envolver un programa legado en una API REST. Si ya tenés esa fachada construida, conectar WhatsApp es agregar un cliente más. Si no la tenés, este es un buen motivo para construirla.
+
+## La arquitectura en tres capas
+
+Nada en IBMi necesita cambiar. El patrón es el mismo strangler fig de siempre, con WhatsApp como un consumidor más de la fachada:
+
+1. **WhatsApp Business API.** Ahí llegan y salen los mensajes. Podés usar la Cloud API de Meta directamente, o un BSP (Business Solution Provider) como Twilio, 360dialog o Gupshup que te resuelve la parte de infraestructura y verificación de número.
+2. **Middleware / servicio intermedio.** Un webhook REST (Node.js, Python, o lo que ya tengas corriendo) que recibe los eventos de WhatsApp, los traduce a llamadas contra tu API existente, y arma la respuesta en el formato que espera el proveedor.
+3. **Fachada RPG/COBOL sobre IBMi.** La misma capa de IWS o Node sobre PASE que ya envuelve tus programas de servicio y DB2 for i. No sabe ni le importa que quien la llama ahora es un mensaje de WhatsApp en vez de un frontend web.
+
+El programa RPG que valida un pedido o consulta un saldo sigue haciendo exactamente lo que hacía antes. Lo único nuevo es el cliente que le habla.
+
+## Cloud API directa o BSP: la decisión que sí importa
+
+Acá está el trade-off real del proyecto, y se decide antes de escribir una línea de RPG:
+
+- **Cloud API de Meta directa** es gratis hasta cierto volumen de conversaciones y te da control total, pero vos te hacés cargo de la verificación del negocio, el manejo de plantillas de mensajes y la infraestructura del webhook.
+- **Un BSP** (Twilio, 360dialog, Gupshup) cobra por mensaje o por conversación, pero te ahorra semanas de configuración: verificación de número más rápida, dashboards de plantillas, y SDKs que ya resuelven la parte tediosa del protocolo.
+
+Para un shop IBMi que nunca tocó la API de WhatsApp, un BSP suele ser la decisión correcta para el primer proyecto. Cambiarte a la Cloud API directa más adelante, cuando el volumen lo justifique, es una migración de proveedor, no una reescritura de arquitectura — la fachada sobre el RPG no se entera del cambio.
+
+## Dónde se rompe en la práctica
+
+Lo que no sale en ningún diagrama de arquitectura:
+
+1. **La ventana de 24 horas.** WhatsApp solo te deja responder libremente dentro de las 24 horas posteriores al último mensaje del usuario. Pasado ese plazo, para iniciar vos la conversación necesitás una **plantilla pre-aprobada** por Meta. Si el flujo que tenés en mente es "el sistema le avisa proactivamente al cliente que su pedido está listo", eso es una plantilla, con proceso de aprobación de días, no un mensaje libre.
+2. **Webhooks duplicados.** WhatsApp reintenta la entrega de eventos si tu servidor no responde rápido. Si tu middleware llama al programa RPG cada vez que recibe el webhook sin deduplicar por message ID, terminás procesando el mismo pedido dos veces. Esto es el mismo problema de idempotencia que ya existe en cualquier integración por webhook, pero acá pega directo contra un programa transaccional que capaz no está pensado para recibir la misma llamada dos veces seguidas.
+3. **Sesión y contexto de conversación.** Un chat de WhatsApp es *stateful* — el usuario espera que el bot recuerde de qué estaban hablando hace tres mensajes. Tu fachada REST es stateless por diseño, igual que en la integración web. Ese estado de conversación hay que guardarlo en el middleware (Redis, una tabla, lo que sea), no empujarlo hacia el RPG.
+4. **Datos sensibles.** Si el caso de uso toca saldos, datos de nómina o información de pacientes, mandarlo por WhatsApp abre una conversación de cumplimiento que no es técnica: cifrado en tránsito lo da la plataforma, pero la política de qué se puede mostrar en un chat y qué no la tenés que definir vos, con legal en la sala, antes de escribir el primer prompt del bot.
+
+## Cuándo tiene sentido y cuándo no
+
+Funciona muy bien para casos de consulta y notificación acotados: estado de un pedido, saldo de cuenta, confirmación de turno, aviso de vencimiento. Son interacciones cortas, con una plantilla clara y un programa RPG que ya responde esa pregunta en algún lado del sistema.
+
+No lo conviertas en un canal de soporte completo de entrada. Si el objetivo real es un chatbot conversacional con IA que entienda lenguaje natural y decida qué programa llamar, eso es un proyecto de agente con su propia capa de orquestación — WhatsApp es solo el canal de entrada, y IBMi sigue siendo la fuente de verdad de los datos, no el que interpreta la intención del usuario.
+
+La pregunta que te tenés que hacer antes de arrancar es la misma que aplica a exponer cualquier RPG como API: ¿ya tenés esa fachada construida y estable? Si la respuesta es sí, WhatsApp es un cliente nuevo sobre una arquitectura que ya probaste. Si la respuesta es no, no empieces por WhatsApp — empezá por la API, y dejá que el canal de mensajería sea el primer consumidor externo que la pone a prueba.
