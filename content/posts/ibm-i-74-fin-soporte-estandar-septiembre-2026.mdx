@@ -1,0 +1,45 @@
+---
+title: "IBM i 7.4 pierde soporte estándar el 30 de septiembre: qué hacer en las próximas ocho semanas"
+excerpt: "El 30 de septiembre de 2026 IBM i 7.4 pasa de soporte estándar a Service Extension, una modalidad paga y acotada. Según Fortra, esa versión todavía corre en alrededor de la mitad del parque instalado. Repasamos las fechas, los costos y las rutas de actualización según el hardware que tengas."
+date: "2026-08-05"
+pillar: "ibmi"
+draft: true
+---
+
+Quedan poco más de ocho semanas. El 30 de septiembre de 2026, IBM i 7.4 deja el soporte estándar y pasa a lo que IBM llama hoy "Change in Service Level" —el nombre que le dieron a lo que antes se llamaba, sin vueltas, End of Support—. La fecha está publicada en la carta de anuncio AD25-0894, de septiembre de 2025, y no es una sorpresa: la venta de licencias nuevas de 7.4 ya se había cortado el 30 de abril de 2026. Lo que sí vale la pena repasar es qué tan grande es el problema y qué opciones concretas tenés según el hardware que tengas hoy en producción.
+
+## El tamaño real del problema
+
+La Encuesta de Mercado IBM i que publica Fortra cada año viene mostrando que IBM i 7.4 representa aproximadamente la mitad del parque instalado en los relevamientos de 2023, 2024 y 2025. No es una versión marginal que unos pocos rezagados todavía arrastran: es, probablemente, la versión que corre en la partición que tenés al lado tuyo ahora mismo. IT Jungle tituló su cobertura del anuncio "And Then There Were Two" [Y entonces quedaron dos], porque una vez que 7.4 sale del soporte estándar, solo quedan dos releases activamente soportadas de la manera normal: 7.5 y 7.6.
+
+Esto importa porque el "Change in Service Level" no es apagar el sistema ni perder la licencia de uso. IBM i 7.4 va a seguir funcionando exactamente igual el 1 de octubre que el 29 de septiembre. Lo que cambia es el nivel de soporte: de ahí en adelante, mantenerte en 7.4 requiere pagar por un programa aparte llamado Service Extension, disponible hasta el 30 de septiembre de 2029.
+
+## Qué cubre —y qué no— el Service Extension
+
+El Service Extension no es una prórroga barata. Según la documentación de IBM sobre el programa, el primer año cuesta 1,5 veces el costo base de tu SWMA (Software Maintenance) actual, y en programas anteriores de este tipo el múltiplo llegó a ser el doble del costo estándar. A cambio, la cobertura se reduce: solo se entregan PTFs críticas y de seguridad. No hay funciones nuevas, no hay mejoras, y ninguna de las novedades que fueron saliendo en los Technology Refresh de 7.5 y 7.6 —incluyendo la función `CVE_INFO` o el soporte BYOK que cubrimos hace unas semanas en este blog— llega a una partición en Service Extension.
+
+En otras palabras: pagás más por menos, y lo que pagás de más no compra funcionalidad, compra tiempo. Para una organización que ya tiene un plan de migración en marcha y necesita unos meses extra para terminarlo con calma, el Service Extension tiene sentido. Como estrategia de largo plazo para evitar el proyecto de actualización, es la opción más cara de las disponibles.
+
+## La ruta de actualización depende del hardware, no de la versión
+
+Acá es donde conviene mirar el parque de hardware antes que el número de release. Las rutas publicadas por IBM son:
+
+- **Power10 o Power11**: podés actualizar directo a 7.5 o a 7.6, sin pasos intermedios.
+- **Power9**: la ruta soportada llega hasta 7.5. Para 7.6 hace falta hardware Power10 o Power11, porque esa versión no corre sobre Power9.
+- **Power8 o anterior**: no hay actualización directa. El camino es restaurar la partición sobre hardware Power10 o Power11 y, desde ahí, actualizar a 7.5 o 7.6.
+
+Si tu SWMA está al día, la actualización del sistema operativo en sí —el software— no tiene costo adicional; lo que se paga aparte, cuando corresponde, es el hardware nuevo si estás en Power8 o más viejo. Esto cambia bastante el cálculo del proyecto: para un shop en Power10 o Power11, el 30 de septiembre es sobre todo una fecha de planificación de ventanas de mantenimiento. Para uno que todavía corre Power8, es un proyecto de infraestructura completo que conviene arrancar ya, no en agosto del año que viene.
+
+## Lo que un upgrade de 7.4 a 7.6 no resuelve solo
+
+Vale la pena separar dos cosas que se mezclan en las conversaciones sobre este tema: actualizar el nivel de sistema operativo y modernizar el código de aplicación. Son proyectos distintos con riesgos distintos. Subir de 7.4 a 7.5 o 7.6 es, en la enorme mayoría de los shops, un proceso bien conocido y de bajo riesgo si se sigue el proceso estándar de IBM: aplicar el PTF de pre-requisitos, correr la actualización, validar. RPG que compilaba en 7.4 compila en 7.6 salvo casos puntuales documentados en las notas de cada release.
+
+Lo que el upgrade de sistema operativo no hace es resolver deuda técnica de aplicación: programas sin documentar, dependencias de hardware obsoleto en el código, o integraciones armadas a mano contra versiones viejas de librerías. Ese trabajo sigue ahí después del 30 de septiembre, tenga la partición la versión que tenga. Conviene no dejar que la urgencia del plazo de soporte tape esa conversación más larga sobre modernización, ni tampoco al revés: no hay que esperar a terminar de modernizar la aplicación para actualizar el sistema operativo, son carriles que pueden avanzar en paralelo.
+
+## Qué hacer esta semana
+
+Primero, confirmá en qué release y en qué hardware está cada partición productiva. Si ya tenés Power10 o Power11, la actualización a 7.5 o 7.6 es la opción más directa y probablemente conviene programarla antes de fin de año, cuando todavía hay margen para elegir la ventana de mantenimiento con calma. Segundo, si estás en Power9, planificá el salto a 7.5 ahora; migrar a 7.6 más adelante, cuando actualices el hardware, es una decisión separada. Tercero, si estás en Power8 o anterior, este es el disparador para iniciar el proyecto de renovación de hardware: la ruta pasa necesariamente por Power10 o Power11, y ese es el tramo que más tiempo de planificación necesita.
+
+Y si por la razón que sea ninguna de esas opciones es viable antes de septiembre, cotizá el Service Extension ahora, no en la última semana. El múltiplo sobre el SWMA actual conviene tenerlo en el presupuesto del año que viene con margen, no como una sorpresa de último momento cuando ya no queda otra alternativa que pagar lo que pidan.
+
+Ninguna de estas decisiones es urgente en el sentido de "hoy se cae el sistema". Pero la ventana para tomarlas con tiempo —y no bajo presión— se cierra rápido. Ocho semanas alcanzan para programar una actualización sobre Power10/Power11. No alcanzan, en la mayoría de los casos, para completar una migración de hardware desde Power8 arrancando de cero.
