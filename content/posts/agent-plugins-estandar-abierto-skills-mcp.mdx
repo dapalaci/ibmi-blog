@@ -1,0 +1,41 @@
+---
+title: "Agent Plugins: el estándar abierto que quiere que empaquetes tus skills y MCP servers una sola vez"
+excerpt: "OpenAI, AWS, Microsoft, GitHub, Cursor y Vercel publicaron el 6 de agosto la versión 1.0.0 de Agent Plugins, un formato común para distribuir skills y servidores MCP entre distintos agentes de código. Qué resuelve, qué no, y qué falta notar sobre quién no está en la mesa."
+date: "2026-08-09"
+pillar: "ia"
+draft: true
+---
+
+Si tu equipo ya escribió un skill para Claude Code, una regla para Cursor y una extensión para GitHub Copilot que hacen básicamente lo mismo —digamos, revisar que un cambio en RPG respete las convenciones de nombres de tu shop—, sabés de qué fragmentación estamos hablando. Cada cliente de agentes espera su propio formato de empaquetado, su propia forma de declarar metadatos, su propia ubicación para el archivo de configuración. El componente reusable es idéntico; el envoltorio cambia según a quién se lo entregues. El 6 de agosto de 2026, un grupo de empresas que compiten directamente entre sí —OpenAI, AWS, Microsoft, GitHub, Cursor (Anysphere) y Vercel, que impulsó la propuesta original— publicó Agent Plugins 1.0.0, un estándar abierto pensado específicamente para terminar con ese problema.
+
+## Qué es concretamente
+
+Agent Plugins no inventa un concepto nuevo: toma dos que ya existían y adopción real —los Agent Skills (instrucciones y recursos reutilizables que le dan a un agente un procedimiento a seguir) y los servidores MCP, el Model Context Protocol que conecta agentes con herramientas y datos externos— y define un contrato mínimo para empaquetarlos juntos en un directorio portable. La estructura es deliberadamente chica:
+
+```text
+mi-plugin/
+├── plugin.json
+├── skills/
+│   └── revisar-nombres-rpg/
+│       ├── SKILL.md
+│       ├── scripts/
+│       └── references/
+├── mcp.json
+└── com.cliente-especifico/
+```
+
+El `plugin.json` solo exige dos campos —la versión de la especificación y el nombre del plugin—; el resto del contrato vive en la estructura de carpetas. Un cliente compatible busca `plugin.json` en la raíz, descubre skills bajo `skills/` si los soporta, y lee la configuración MCP desde `mcp.json` si soporta servidores MCP. Cada componente se valida por separado, así que un skill mal formado no tira abajo el resto del plugin. Los directorios con nombre de dominio invertido (`com.cliente-especifico/`) son el espacio para que cada cliente guarde datos propios sin ensuciar el formato común.
+
+La decisión de mantener el alcance reducido a solo dos tipos de componente es explícita: comandos, hooks y agentes —piezas que Claude Code, por ejemplo, ya empaqueta en sus propios plugins— quedan por ahora fuera del estándar y siguen siendo terreno de cada cliente. El Comité Técnico de Dirección puede sumarlos en versiones futuras, pero solo cuando la semántica converja entre clientes y haya una necesidad de portabilidad demostrada, no antes.
+
+## Para qué sirve en la práctica
+
+El caso de uso que motiva el estándar es concreto: hoy, si publicás un skill que audita SQLRPGLE contra el catálogo QSYS2 o que arma un resumen de cambios pendientes en una biblioteca de desarrollo, y querés que funcione tanto en Claude Code como en Cursor y en VS Code, terminás manteniendo tres carpetas casi idénticas con tres convenciones de metadata distintas. Con Agent Plugins, empaquetás el skill y la configuración MCP una sola vez, y cualquier cliente que implemente el estándar lo descubre y lo carga sin que vuelvas a tocar nada. En el lanzamiento, los clientes que ya lo soportan son ChatGPT, Codex, Cursor, GitHub Copilot, Kiro (el agente de AWS) y VS Code. La especificación completa, sus JSON Schemas y las guías tanto para autores de plugins como para quienes implementan clientes están publicadas en agent-plugins.org, con la gobernanza y el proceso de contribución abiertos en el repositorio del proyecto en GitHub.
+
+Vale la pena notar, con la misma precisión con la que hay que leer cualquier anuncio de estandarización, un dato que no aparece explicado en el material de lanzamiento: el Comité Técnico de Dirección inicial —con mantenedores principales de AWS, Cursor, Microsoft, OpenAI y Vercel— no incluye a Anthropic entre los fundadores, pese a que tanto el concepto de Agent Skills como el protocolo MCP sobre el que se apoya el estándar se originaron en el trabajo de Anthropic, y pese a que Claude Code ya tiene desde antes su propio formato de plugin que empaqueta skills, servidores MCP, comandos, hooks y agentes en un solo paquete instalable. No hay en las fuentes consultadas para esta nota una declaración pública de Anthropic sobre Agent Plugins 1.0.0 ni confirmación de si Claude Code va a adoptar el formato compatible con `plugin.json`; es un dato a seguir, no una conclusión a sacar todavía.
+
+## Qué hacer esta semana
+
+No hace falta salir a re-empaquetar todo lo que tu equipo ya construyó. Primero, inventariar qué skills y configuraciones MCP mantiene tu equipo hoy, y para cuántos clientes distintos los están duplicando manualmente: si la respuesta es "para uno solo", el estándar todavía no te ahorra nada, y conviene esperar a ver qué tan estable queda la adopción antes de invertir tiempo en migrar. Segundo, si tu organización sí sostiene el mismo skill repetido en Cursor, VS Code y Copilot —un escenario común en shops que mezclan herramientas por preferencia de cada desarrollador—, ahí el retorno es inmediato y vale la pena revisar la especificación en agent-plugins.org antes del próximo skill nuevo que armes, para empaquetarlo directamente en el formato portable en lugar de en el formato específico de un solo cliente. Tercero, no asumir que Agent Plugins reemplaza a MCP o a Agent Skills: es una capa de empaquetado encima de ambos, no un protocolo nuevo que haya que aprender desde cero; si ya escribiste un `SKILL.md` o configuraste un servidor MCP, ese trabajo se reutiliza casi sin cambios. Y cuarto, si tu flujo de trabajo depende de Claude Code de forma primaria, tratar la falta de confirmación de soporte como lo que es —una incógnita concreta, no una señal de que el estándar vaya a fallar ni de que vaya a triunfar— y volver a revisar el estado de adopción en un mes, cuando probablemente ya haya más claridad sobre qué clientes se suman y cuáles se quedan afuera.
+
+*Fuentes: Jonathan Hefner, "Introducing Agent Plugins", Vercel, 6 de agosto de 2026; "AWS Supports Agent Plugins: An Open Standard for Portable Agent Extensions", AWS Open Source Blog; especificación pública en agent-plugins.org y en el repositorio github.com/agentplugins/agent-plugins-spec.*
