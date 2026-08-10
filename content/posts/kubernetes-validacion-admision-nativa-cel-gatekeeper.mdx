@@ -1,0 +1,58 @@
+---
+title: "Kubernetes deja atrás los webhooks: la validación de políticas ahora corre nativa con CEL"
+excerpt: "Azure Policy for Kubernetes sumó soporte para generar Validating Admission Policies nativas a partir de Gatekeeper, apoyándose en CEL en lugar de webhooks de Rego. Es un cambio de fontanería, pero resuelve un problema real de latencia y disponibilidad en clusters de producción — con lecciones que aplican a cualquier shop que gobierne infraestructura como código."
+date: "2026-08-08"
+pillar: "cloud"
+draft: true
+---
+
+Microsoft anunció esta semana que Azure Policy for Kubernetes ya genera automáticamente objetos `ValidatingAdmissionPolicy` (VAP) nativos de Kubernetes a partir de las políticas de Gatekeeper que usan CEL, el lenguaje de expresiones de Google. No es un anuncio con nombre pegadizo ni una función que cambie cómo se escribe una política — es, en el fondo, un cambio de dónde y cómo se ejecuta la validación. Pero para cualquier equipo que gobierne clusters de Kubernetes en producción, especialmente en entornos híbridos donde AKS convive con sistemas más tradicionales como IBM i, vale la pena entender qué resuelve y qué no.
+
+## El problema que tenía el modelo de webhooks
+
+Desde que existe control de admisión extensible en Kubernetes, la forma estándar de aplicar políticas propias — "todo pod debe tener límites de CPU", "ninguna imagen puede venir de un registro no autorizado", "estos labels son obligatorios" — ha sido un *admission webhook*: cuando alguien crea o modifica un recurso, el API server hace una llamada HTTP saliente a un servicio externo (normalmente Gatekeeper, construido sobre Open Policy Agent) que evalúa la política y responde si el objeto se acepta o se rechaza.
+
+Ese modelo funciona, pero tiene tres costos operativos que cualquiera que haya administrado Gatekeeper en un cluster grande conoce de memoria. Primero, latencia: cada creación de recurso paga el precio de una llamada de red adicional, ida y vuelta, antes de que el API server pueda seguir. Segundo, disponibilidad: si el webhook no responde — porque el pod de Gatekeeper se cayó, porque hay presión de red, porque el propio cluster está bajo estrés — hay que decidir entre fallar abierto (dejar pasar el recurso sin validar) o fallar cerrado (bloquear toda creación de recursos hasta que el webhook vuelva). Ninguna opción es cómoda a las tres de la mañana. Tercero, el webhook en sí es infraestructura que hay que operar: parchear, versionar, monitorear, escalar.
+
+## Qué cambia con VAP y CEL
+
+Kubernetes viene resolviendo esto desde adentro. La función `ValidatingAdmissionPolicy` se introdujo como alfa en la versión 1.26, pasó a beta (deshabilitada por defecto) en la 1.28, y llegó a disponibilidad general — habilitada por defecto — en la 1.30. La idea es simple de enunciar: en lugar de delegar la validación a un servicio externo, el propio API server evalúa la política, escrita en CEL (Common Expression Language), como parte del proceso de admisión. Sin llamada de red, sin servicio adicional que pueda caerse, sin el dilema de fail-open contra fail-closed cuando ese servicio no está.
+
+Gatekeeper soporta este modelo desde su versión 3.18 de forma estable, y desde la 3.20 (en beta) puede generar automáticamente los objetos `ValidatingAdmissionPolicy` y sus `ValidatingAdmissionPolicyBinding` a partir de una `ConstraintTemplate` existente, siempre que esa plantilla use el motor `K8sNativeValidation` con expresiones CEL en lugar de Rego. Lo que anunció Azure Policy for Kubernetes esta semana es que ese mecanismo ya está integrado en el servicio gestionado: si una política de Azure trae CEL, AKS genera el VAP nativo sin que el equipo de plataforma tenga que tocar Gatekeeper a mano. Los requisitos son concretos y vale anotarlos si se está por migrar: Kubernetes 1.30 o superior, y Gatekeeper 3.23.0 o superior.
+
+Un ejemplo simplificado de cómo se ve una `ConstraintTemplate` con el motor nativo, exigiendo un label obligatorio:
+
+```yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      code:
+        - engine: K8sNativeValidation
+          source:
+            generateVAP: true
+            validations:
+              - expression: >-
+                  has(object.metadata.labels) &&
+                  'costcenter' in object.metadata.labels
+                message: "falta el label obligatorio 'costcenter'"
+```
+
+Con `generateVAP: true`, Gatekeeper produce el `ValidatingAdmissionPolicy` correspondiente y su binding, y desde ese momento la validación de este recurso específico la hace el API server directamente, no el webhook. Gatekeeper sigue existiendo para lo que CEL no puede resolver bien — políticas referenciales que necesitan consultar datos externos, o reglas que siguen escritas en Rego — y también sigue funcionando como respaldo si el VAP nativo llegara a fallar abierto, según documenta el propio proyecto.
+
+## Por qué esto importa más allá de Kubernetes puro
+
+Nada de esto es exclusivo de aplicaciones cloud-native nuevas. Cualquier organización que use Kubernetes como capa de integración frente a sistemas más antiguos — APIs que exponen lógica de negocio corriendo en RPG sobre IBM i, por ejemplo, algo que ya cubrimos en este blog al hablar de exponer RPG como API REST — probablemente tiene ese cluster gobernado por las mismas reglas de compliance que el resto de la infraestructura: qué imágenes se permiten, qué recursos deben etiquetarse para poder facturar por centro de costo, qué namespaces no pueden recibir tráfico externo directo. Ese tipo de gobernanza es exactamente lo que Gatekeeper con OPA viene resolviendo desde hace años, y es exactamente el tipo de política que se beneficia de moverse a evaluación nativa: menos piezas móviles, menos latencia en el camino crítico de cada despliegue, y un comportamiento de "fallar cerrado" que no depende de que un pod externo esté sano en el momento exacto en que alguien hace un `kubectl apply`.
+
+La contracara honesta: CEL no es Rego. Es un lenguaje de expresiones, no un lenguaje de políticas completo, y hay reglas — las que necesitan mirar el estado de otros recursos en el cluster, por ejemplo — que hoy siguen necesitando el webhook. La migración razonable no es "mover todo a CEL de una vez", sino identificar qué políticas son simples validaciones de forma (labels obligatorios, límites de recursos, repositorios de imágenes permitidos) y migrar esas primero, dejando el webhook activo para el resto.
+
+## Qué hacer con esto esta semana
+
+Si tu equipo administra Gatekeeper en AKS, EKS o GKE, el primer paso concreto es confirmar la versión de Kubernetes y de Gatekeeper que corren tus clusters — 1.30 y 3.23 son el piso para este camino — y revisar cuántas de las `ConstraintTemplates` actuales están escritas puramente en Rego sin necesidad real de datos externos. Esas son candidatas directas a reescribirse en CEL y activarse con `generateVAP: true`. No hace falta apurar la migración completa: el valor real aparece en los clusters con más tráfico de admisión, donde cada milisegundo de latencia de webhook y cada minuto de indisponibilidad de Gatekeeper pesan de verdad en el SLA. Ahí es donde conviene medir antes y después, con datos, en lugar de asumir la mejora.
