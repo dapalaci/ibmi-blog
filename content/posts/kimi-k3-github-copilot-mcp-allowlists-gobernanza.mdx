@@ -1,0 +1,45 @@
+---
+title: "Kimi K3 en GitHub Copilot: la semana en que elegir modelo de IA se volvió una decisión de gobernanza"
+excerpt: "El 6 de agosto GitHub llevó Kimi K3, un modelo abierto, a disponibilidad general en Copilot — y ese mismo día activó allowlists para controlar qué servidores MCP puede invocar el agente. Un día después sumó retorno de inversión al dashboard de impacto. Tres piezas que, juntas, cuentan una sola historia: elegir modelo dejó de ser una decisión de desarrollador."
+date: "2026-08-10"
+pillar: "ia"
+draft: true
+---
+
+La primera semana de agosto GitHub publicó, casi en simultáneo, tres cambios en Copilot que a primera vista parecen ir en direcciones opuestas. El 6 de agosto llevó a disponibilidad general Kimi K3, un modelo de pesos abiertos, ampliando el menú de modelos que un desarrollador puede elegir dentro del editor. Ese mismo día activó allowlists de servidores MCP en la configuración empresarial, dándole a los administradores una forma de bloquear qué puede invocar el agente. Y el 7 de agosto sumó una sección de retorno de inversión al dashboard de impacto de Copilot, para que las empresas puedan ver cuánto cuesta esa adopción y qué producen a cambio. Ninguno de los tres anuncios es, por sí solo, una gran noticia. Juntos, describen bastante bien hacia dónde va la adopción empresarial de agentes de código: más opciones de modelo, y al mismo tiempo, más control sobre lo que esos modelos pueden tocar.
+
+## Kimi K3: un modelo abierto, con la letra chica de siempre
+
+Kimi K3 es un modelo de pesos abiertos que GitHub aloja a través de Fireworks AI y que ya está disponible en el selector de modelos de Copilot para los planes Pro, Pro+, Max, Business y Enterprise, con soporte en VS Code, Visual Studio, la Copilot CLI, el agente en la nube, la app de Copilot, github.com, GitHub Mobile, JetBrains, Xcode y Eclipse. El precio, según el propio changelog de GitHub, es de 3 dólares por millón de tokens de entrada, 15 dólares por millón de tokens de salida y 0,30 dólares por millón de tokens de entrada cacheados — sensiblemente más barato que los modelos de frontera que ya convivían en ese mismo selector.
+
+El detalle que importa más que el precio es cómo se activa. Para cuentas Business y Enterprise, Kimi K3 viene apagado por defecto: un administrador tiene que habilitar explícitamente la política correspondiente antes de que cualquier persona de la organización pueda seleccionarlo. GitHub lo dice sin rodeos en su propio anuncio: recomienda revisar los modelos de pesos abiertos contra los requisitos de seguridad, cumplimiento y gobernanza de datos de cada empresa antes de activarlos. El lanzamiento tampoco fue perfectamente limpio: GitHub pausó el rollout unas horas ese mismo 6 de agosto para mitigar un incidente en GitHub Actions, y lo retomó más tarde el mismo día — recordatorio de que sumar un proveedor de inferencia adicional, en este caso Fireworks AI hosteando un modelo que no es de OpenAI, Anthropic ni Google, también suma superficie operativa nueva.
+
+## MCP allowlists: ponerle candado a lo que el agente puede invocar
+
+El mismo 6 de agosto, GitHub hizo disponibles con carácter general dos claves nuevas en la configuración empresarial administrada: `allowedMcpServers` y `deniedMcpServers`, declaradas en el archivo `copilot/managed-settings.json`. La idea es simple y directa: en lugar de confiar en que cada desarrollador conecte servidores MCP confiables por su cuenta, el dueño de la empresa define centralmente cuáles están permitidos y cuáles bloqueados, en todos los clientes de Copilot de la organización.
+
+El mecanismo tiene más cuidado del que parece a simple vista. Cada clave acepta tres tipos de matcher: `serverUrl`, que identifica servidores remotos por HTTP/SSE, admite comodines y canonicaliza la URL para evitar que alguien la esquive con una variante equivalente; `serverCommand`, que identifica servidores locales (stdio) por el comando exacto y sus argumentos; y `serverName`, que GitHub aclara explícitamente que es solo una comodidad de lectura y no un control de seguridad, porque cualquier usuario puede renombrar un servidor. Un ejemplo simplificado de cómo se ve esta configuración:
+
+```json
+{
+  "allowedMcpServers": [
+    { "serverUrl": "https://mcp.miempresa.com/*" },
+    { "serverCommand": "npx -y @miempresa/mcp-server-interno" }
+  ],
+  "deniedMcpServers": [
+    { "serverUrl": "*" }
+  ]
+}
+```
+
+Dos decisiones de diseño valen la pena resaltarse. Primero, las políticas fallan cerradas: una configuración malformada o que no se puede verificar se bloquea, no se deja pasar. Segundo, cuando hay políticas en más de una capa —una base a nivel empresa y un ajuste a nivel equipo, si la clave se marca `overridable`— un servidor tiene que pasar todas las capas. Por ahora esta protección se aplica solo en la app de Copilot, la Copilot CLI y VS Code: una lista más corta que la de clientes donde ya corre Kimi K3, dato útil en sí mismo — la superficie de modelos crece más rápido que la de control.
+
+## Por qué esto no es una contradicción
+
+A primera vista, sumar un modelo abierto y nuevo el mismo día que se activa un mecanismo de bloqueo parece un mensaje mixto. Mirado con más cuidado es exactamente lo contrario: es la misma lógica aplicada a dos capas distintas de la misma superficie de riesgo. Un modelo de código agéntico no es peligroso solo por lo que genera — es peligroso por lo que puede invocar en nombre del usuario. Cuantos más modelos conviven en el mismo selector, con distintos proveedores de inferencia, distintas licencias y distintos perfiles de entrenamiento, más sentido tiene que la otra mitad de la ecuación —qué sistemas externos puede tocar el agente vía MCP— esté centralizada y no librada a que cada desarrollador decida por su cuenta qué servidor conectar. Ya lo veníamos señalando en esta columna al hablar de Agent Plugins y de la gobernanza de agentes de código: la proliferación de modelos y de servidores MCP hace que "quién decide qué puede hacer el agente" deje de ser una pregunta técnica y pase a ser, cada vez más, una pregunta de política corporativa.
+
+La sección de retorno de inversión que GitHub sumó al día siguiente al dashboard de impacto encaja en la misma foto. Compara, para desarrolladores agrupados por profundidad de adopción —desde quienes usan mayormente el chat y el autocompletado hasta quienes ya trabajan agente-first—, el costo mensual por desarrollador derivado del consumo real de créditos de IA, ese costo como porcentaje de la nómina y la cantidad de pull requests producidos por mes, con un selector de banda salarial para modelar el retorno. GitHub aclara que son cifras estimadas y direccionales, no datos de nómina reales — pero da, por primera vez de forma nativa, una manera de comparar el costo de un modelo caro contra uno barato como Kimi K3 en términos de producción real, no solo de precio por token.
+
+## Qué hacer con esto esta semana
+
+Si tu organización usa Copilot Business o Enterprise, no dejes que Kimi K3 quede activado o desactivado por default sin una decisión explícita: revisá qué significa para tus requisitos de cumplimiento que el código pase por Fireworks AI como proveedor de inferencia, con los mismos criterios con los que evaluarías cualquier otro proveedor externo nuevo. En paralelo, si todavía no tenés un `copilot/managed-settings.json` con `allowedMcpServers` definido, armalo ahora: hacé un inventario de qué servidores MCP están conectados hoy —muchos probablemente los sumó cada desarrollador por su cuenta— antes de que la lista de modelos disponibles siga creciendo más rápido que la de controles. Y si tenés el dashboard de impacto habilitado, usá la nueva sección de ROI para construir una línea de base de costo por desarrollador antes de aprobar modelos más baratos: sin ese punto de comparación, cualquier decisión sobre qué modelo autorizar va a basarse en el precio por token y no en lo que realmente produce.
