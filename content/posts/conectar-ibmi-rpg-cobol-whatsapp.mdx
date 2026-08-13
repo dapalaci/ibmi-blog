@@ -3,7 +3,7 @@ title: "Conectar RPG/COBOL en IBMi con WhatsApp: la arquitectura que sí funcion
 excerpt: "IBMi no habla WhatsApp y nunca lo va a hablar. La integración real pasa por una capa intermedia que ya deberías tener si expusiste RPG como API — acá está el patrón completo y dónde se complica en la práctica."
 date: "2026-08-05"
 pillar: "ibmi"
-draft: true
+draft: false
 ---
 
 La pregunta llega siempre con la misma estructura: "¿se puede mandar un WhatsApp desde un programa RPG?". La respuesta corta es sí. La respuesta útil es que RPG y COBOL nunca van a hablar con WhatsApp directamente, y no deberían intentarlo — la integración vive en la misma capa intermedia que [ya cubrimos acá](/blog/exponer-rpg-como-api-rest) cuando hablamos de envolver un programa legado en una API REST. Si ya tenés esa fachada construida, conectar WhatsApp es agregar un cliente más. Si no la tenés, este es un buen motivo para construirla.

@@ -3,7 +3,7 @@ title: "Auto mode por defecto en Claude Code: los números que llevaron a Anthro
 excerpt: "Desde el 14 de agosto, Claude Code arranca en auto mode por defecto para las cuentas Pro, Max y Team: en vez de preguntar antes de cada acción, un clasificador bloquea solo lo irreversible, destructivo o dirigido fuera del entorno. Los datos que publicó Anthropic explican la decisión — y plantean qué controles necesita hoy un equipo que corre estos agentes contra sistemas de producción."
 date: "2026-08-11"
 pillar: "ia"
-draft: true
+draft: false
 ---
 
 El 7 de agosto Anthropic anunció que, a partir del 14, las cuentas Pro, Max y Team de Claude Code van a arrancar en auto mode por defecto. El cambio venía probándose desde marzo como opción, pero ahora pasa a ser el comportamiento de fábrica: en vez de mostrar un prompt de aprobación antes de cada acción —leer un archivo, ejecutar un comando, hacer un commit—, un clasificador revisa cada llamada a herramienta y solo interrumpe cuando detecta algo irreversible, destructivo o dirigido fuera del entorno de trabajo. Si el clasificador bloquea algo, Claude por lo general encuentra un camino más seguro por su cuenta o le pregunta directamente al usuario; si no puede avanzar —tres bloqueos seguidos, o veinte en una misma sesión— Claude Code cae de nuevo a aprobación manual. Para cuentas Enterprise, la API, y los despliegues en AWS, Google Cloud y Microsoft Foundry, el modo sigue siendo opcional por ahora, con el mismo cambio planeado para "el próximo mes" según Anthropic.

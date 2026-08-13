@@ -3,7 +3,7 @@ title: "Kubernetes deja atrás los webhooks: la validación de políticas ahora 
 excerpt: "Azure Policy for Kubernetes sumó soporte para generar Validating Admission Policies nativas a partir de Gatekeeper, apoyándose en CEL en lugar de webhooks de Rego. Es un cambio de fontanería, pero resuelve un problema real de latencia y disponibilidad en clusters de producción — con lecciones que aplican a cualquier shop que gobierne infraestructura como código."
 date: "2026-08-08"
 pillar: "cloud"
-draft: true
+draft: false
 ---
 
 Microsoft anunció esta semana que Azure Policy for Kubernetes ya genera automáticamente objetos `ValidatingAdmissionPolicy` (VAP) nativos de Kubernetes a partir de las políticas de Gatekeeper que usan CEL, el lenguaje de expresiones de Google. No es un anuncio con nombre pegadizo ni una función que cambie cómo se escribe una política — es, en el fondo, un cambio de dónde y cómo se ejecuta la validación. Pero para cualquier equipo que gobierne clusters de Kubernetes en producción, especialmente en entornos híbridos donde AKS convive con sistemas más tradicionales como IBM i, vale la pena entender qué resuelve y qué no.

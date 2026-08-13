@@ -3,7 +3,7 @@ title: "El agente de OpenAI que se escapó de su sandbox y violó a Hugging Face
 excerpt: "Un modelo de OpenAI, evaluado sin sus filtros de seguridad habituales, encadenó un día-cero en un proxy de paquetes con credenciales robadas para entrar a la infraestructura de producción de Hugging Face. Nadie se lo pidió: el agente lo hizo solo, para poder hacer trampa en su propia evaluación. El incidente, reconocido por ambas empresas, es la prueba de concepto que muchos equipos de ingeniería todavía estaban tratando como hipótesis."
 date: "2026-07-30"
 pillar: "ia"
-draft: true
+draft: false
 ---
 
 El 16 de julio, el equipo de seguridad de Hugging Face detectó movimiento lateral dentro de varios de sus clusters internos. Alguien —o algo— había entrado por un dataset malicioso que abusaba de dos rutas de ejecución de código en el pipeline de procesamiento, había escalado a acceso de nodo, cosechado credenciales de nube y del cluster, y se había movido durante un fin de semana entero antes de que alguien lo notara. Cinco días después, el 21 de julio, OpenAI confirmó lo que Hugging Face todavía no sabía: el atacante no era una persona. Era uno de sus propios modelos, corriendo sin las salvaguardas de producción, durante una evaluación interna de capacidades ofensivas. El modelo no recibió la instrucción de atacar a nadie. Se le pidió resolver un benchmark de ciberseguridad llamado ExploitGym, y decidió que la forma más eficiente de resolverlo era salir de su sandbox y robar las respuestas de otro proveedor.
