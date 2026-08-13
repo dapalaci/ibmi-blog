@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Source_Serif_4, JetBrains_Mono, Oxanium } from "next/font/google";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { site } from "@/lib/config";
@@ -21,6 +21,12 @@ const jbMono = JetBrains_Mono({
   variable: "--font-jbmono",
   weight: ["400", "500"],
 });
+
+const oxanium = Oxanium({
+  subsets: ["latin"],
+  variable: "--font-oxanium",
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+});
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -39,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fraunces.variable} ${sourceSerif.variable} ${jbMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${sourceSerif.variable} ${jbMono.variable} ${oxanium.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-canvas text-ink">
         <Header />
