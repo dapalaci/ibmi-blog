@@ -1,0 +1,41 @@
+---
+title: "Por qué un modelo de IA no sabe leer bien un reporte de IBM i (y qué extracción sí funciona)"
+excerpt: "Los listados de ancho fijo que generan RPG y COBOL en IBM i, AS/400 y mainframe son un punto ciego real para los LLM. El caso de Astera ReportMiner explica por qué la extracción por plantilla sigue ganando — y dónde la IA sí suma."
+date: "2026-08-13"
+pillar: "ibmi"
+draft: true
+---
+
+Se habla de la IA como si fuera la respuesta universal para cualquier problema de datos: apuntale un modelo a un documento y que saque la información. Esa promesa se rompe, de forma bastante predecible, contra un tipo de archivo que cualquier shop IBM i conoce de memoria: el listado de ancho fijo. El spool que genera un programa RPG o COBOL, sin etiquetas, sin delimitadores, con cada valor ubicado en una posición de carácter exacta. Esta semana [IT Jungle](https://www.itjungle.com/2026/08/10/astera-makes-extracting-legacy-report-data-an-ai-specialty/) cubrió el caso de Astera, una empresa que construyó un producto entero — ReportMiner — alrededor de esta idea: para este tipo de reporte, un modelo de lenguaje no es la herramienta correcta, y la solución que sí funciona es más aburrida de lo que parece.
+
+Vale la pena detenerse en por qué, porque el problema no es específico de Astera ni de su producto. Es una limitación estructural de cómo procesan texto los LLM, y afecta a cualquiera que esté evaluando "mandarle" los reportes de su AS/400 a un modelo para automatizar su lectura.
+
+## El problema no es que sean "no estructurados"
+
+Un listado generado por IBM i está, de hecho, muy estructurado. Lo que no tiene es estructura semántica: no hay XML, no hay JSON, no hay encabezados de columna que se repitan en cada página de forma que un parser los reconozca como tales. La estructura es posicional. Un campo empieza en la columna 22 y termina en la 28. El siguiente arranca en la 30. No hay ningún carácter que separe uno de otro — el límite lo define la posición, no un delimitador.
+
+Astera lo ilustra con un ejemplo simple y contundente: en una línea de un reporte de liquidación, un conteo de "14823" ocupa las posiciones 22 a 28, y el monto que sigue, "287493021847.50", ocupa las posiciones 30 a 45. Si la lógica de extracción se corre un solo carácter, el conteo pasa a leerse "4823" o "148,23", y el monto arrastra un dígito de la columna siguiente. El resultado sigue pareciendo un número válido. El error es silencioso.
+
+Un LLM procesa texto como tokens, no como un arreglo de posiciones de carácter. Leyendo "14823 287493021847.50" sin delimitadores explícitos, no tiene una forma confiable de saber dónde termina un campo y empieza el otro. No es que "se equivoque a veces" — es que el mecanismo con el que interpreta texto no está pensado para este tipo de estructura.
+
+## Un caso que cualquier shop IBM i va a reconocer
+
+El artículo de Astera pone como ejemplo un reporte de liquidación bancaria, pero la lista de reportes típicos de AS/400 e IBM i que mencionan es más cercana al día a día de la mayoría: listas de materiales, programación de producción, posición de inventario, registros de control de calidad y salidas de MRP. Todos comparten el mismo patrón — estructura anidada, con un encabezado (una orden de trabajo, un lote) del que cuelgan múltiples filas de detalle (operaciones, componentes), y sin ninguna marca explícita de esa jerarquía más allá de la posición y la sangría.
+
+A eso hay que sumarle el volumen. Un extracto de mayor general de un AS/400 puede correr más de mil páginas. A esa escala, mandar cada página a un LLM tiene tres problemas prácticos: el costo de inferencia por página se acumula rápido si el proceso corre a diario; la ventana de contexto del modelo no alcanza a "ver" el reporte completo, así que pierde la relación entre un encabezado en la página 1 y datos en la página 247; y la latencia de procesar página por página vuelve impracticable un proceso batch.
+
+## Lo que sí funciona: plantilla determinística, IA como acelerador
+
+La solución que describe Astera no descarta la IA — la usa donde tiene sentido y la evita donde no. El motor de extracción de ReportMiner opera sobre posiciones de carácter, no sobre interpretación probabilística de texto: una plantilla definida una vez, sobre un reporte con layout estable, sigue funcionando sin cambios durante años, porque el programa COBOL o RPG que genera ese reporte tampoco cambió. Eso es determinismo puro — sin margen de alucinación, sin variabilidad entre corridas.
+
+Donde sí entra la IA es en acelerar la construcción de esa plantilla: la función de auto-generación de layout analiza un reporte de muestra y arma la plantilla completa — secciones, columnas, relaciones jerárquicas — en cuestión de segundos, en vez de las horas que toma definir cada posición a mano. Y para reportes con formatos únicos o poco frecuentes, donde no vale la pena invertir en una plantilla reutilizable, la extracción asistida por IA sin plantilla previa sí es una opción razonable para un análisis inicial.
+
+Es la misma lógica que separa dos tareas que suenan parecidas pero no lo son: "entender qué contiene un documento" e "informarme con exactitud cuál es cada valor". La primera tolera cierta ambigüedad. La segunda, cuando se trata de montos financieros o datos regulados, no tolera ninguna.
+
+## La lección que aplica más allá de este caso puntual
+
+El patrón general vale para cualquier decisión de arquitectura que involucre IA en un entorno IBM i: la pregunta correcta no es "¿usamos IA o no?", es "¿en qué parte del proceso el error es tolerable, y en cuál no lo es?". Leer un programa RPG sin documentación y proponer una hipótesis de qué hace — tarea que ya cubrimos en este blog — tolera error, porque el resultado se revisa antes de actuar sobre él. Extraer un monto de liquidación de un reporte financiero para cargarlo directo en un sistema contable no tolera error, porque nadie va a revisar cada fila una por una.
+
+## Qué hacer esta semana si tu shop genera reportes de ancho fijo
+
+Tres pasos concretos. Primero, hacer un inventario rápido de qué reportes recurrentes de tu AS/400 o IBM i hoy se procesan a mano o con scripts frágiles que se rompen cada vez que cambia levemente el formato — son los candidatos naturales para automatizar. Segundo, antes de evaluar cualquier herramienta, separar mentalmente los reportes por tolerancia al error: los que alimentan decisiones financieras o de cumplimiento van con extracción determinística por plantilla; los que sirven para exploración o resumen humano pueden tolerar un enfoque más flexible. Tercero, si evaluás una herramienta de extracción, pedile que procese uno de tus reportes reales — no una demo genérica — y revisá el resultado columna por columna antes de confiar en que escala a producción. Un error de un carácter de posición no se nota a simple vista, y ese es justamente el tipo de falla que conviene descartar antes de automatizar, no después.
