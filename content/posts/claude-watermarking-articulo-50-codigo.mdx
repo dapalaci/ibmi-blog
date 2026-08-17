@@ -1,0 +1,41 @@
+---
+title: "Claude empieza a marcar lo que escribe: qué significa el watermarking del Artículo 50 para el código que genera un agente"
+excerpt: "El 11 de agosto Anthropic confirmó que sus modelos insertan una marca invisible en todo el texto que generan, para cumplir con el Código de Transparencia de la Ley de IA europea. La medida alcanza a Claude Code y abre preguntas concretas para cualquiera que use un agente en su flujo de trabajo diario."
+date: "2026-08-14"
+pillar: "ia"
+draft: true
+---
+
+El 2 de agosto entraron en vigor las obligaciones de transparencia del Artículo 50 de la Ley de IA de la Unión Europea, el tramo del reglamento que exige marcar el contenido generado por IA de forma identificable para sistemas automáticos. En este blog ya cubrimos ese primer momento del plazo. Lo que faltaba era ver cómo un proveedor concreto lo traducía en un producto real, y esta semana llegó la respuesta: el 11 de agosto Anthropic [confirmó a TechCrunch](https://techcrunch.com/2026/08/11/anthropic-says-it-will-watermark-text-generated-by-its-ai-models/) que sus modelos ya insertan una marca invisible en el texto que generan, y publicó los detalles en su [centro de ayuda](https://support.claude.com/en/articles/16266773-how-claude-marks-ai-generated-content). Lo que hace que esta noticia importe más allá del cumplimiento regulatorio es un dato concreto: la marca alcanza explícitamente a Claude Code, no solo al chat. Vale la pena entender cómo funciona y qué preguntas deja abiertas para quien lo usa a diario.
+
+## Qué dice Anthropic que hace la marca
+
+Según el propio artículo de soporte, Claude usa dos mecanismos distintos, y conviene no confundirlos:
+
+**Watermark embebido en texto.** Cuando un modelo compatible genera texto, "teje" una marca imperceptible directamente en ese texto. Anthropic dice explícitamente que no cambia el significado, la calidad ni la legibilidad de la respuesta, que viaja cuando el texto se copia y pega en otro lugar, y que puede persistir a través de cierta edición. La marca se aplica a nivel de modelo, no de producto — es decir, está presente sin importar si el texto salió de la consola de Claude, del API, de Claude Code, de Claude Cowork o de Claude Tag.
+
+**Metadatos de procedencia firmados.** Cuando Claude genera un archivo de un tipo soportado (Anthropic menciona `.svg`, `.png`, `.jpg`), le adjunta metadatos firmados siguiendo el estándar abierto C2PA (Coalition for Content Provenance and Authenticity), el mismo que ya usan otras plataformas de la industria. Esto permite detectar si el archivo fue procesado por Claude y si fue alterado después.
+
+Un detalle que suele pasar desapercibido: el marcado no se limita a la Unión Europea. Anthropic aclara que aplica "donde sea que se ofrezca Claude, en todo el mundo" — es una decisión de diseño global, no un interruptor regional. También se extiende a los socios de nube: si accedés a un modelo Claude compatible a través de AWS, Google Cloud o Microsoft Foundry, el watermark de texto se aplica igual, aunque los metadatos de archivo pueden no estar soportados en todas las plataformas.
+
+## Lo que todavía no cubre
+
+Anthropic es bastante directo sobre las limitaciones, y es la parte más útil del documento para un equipo de ingeniería. Primero, solo los modelos lanzados a partir del 2 de agosto de 2026 traen el marcado desde el día uno; los modelos anteriores están en un período de transición y todavía no lo tienen, aunque la compañía dice estar trabajando en sumarlo. Segundo, detectar una marca no confirma la procedencia completa del contenido: Claude puede no ser el autor original (por ejemplo, si se usó para traducir, resumir o revisar un texto que ya existía), y el contenido puede haber sido modificado después de pasar por el modelo. Tercero — y este es el que más importa en la práctica — la ausencia de marca no significa que el contenido no sea de IA: pasajes muy cortos, texto muy editado o parafraseado, conversión de formato, capturas de pantalla o simplemente el uso de un modelo o superficie sin soporte todavía pueden borrar la señal.
+
+Sobre cómo detectar esas marcas, Anthropic todavía no publicó la documentación técnica: dice que la va a compartir "a medida que esté disponible". Hoy no existe una herramienta pública de Anthropic para verificar si un texto o archivo tiene su marca.
+
+## Qué implica para el código que escribe un agente
+
+Acá es donde el anuncio deja de ser una nota de cumplimiento y pasa a tocar el trabajo diario. La documentación de Anthropic dice que el watermark de texto aplica a "todo el texto generado" y que cubre explícitamente a Claude Code, pero no entra en detalle sobre cómo se comporta específicamente en código fuente — a diferencia de la prosa, el código tiene mucha menos libertad de elección de palabras (la sintaxis, las convenciones del lenguaje y la necesidad de que el programa compile limitan drásticamente cuántas variantes "equivalentes" existen para expresar la misma lógica). Anthropic no aclara públicamente si eso afecta la fiabilidad de la marca en archivos de código, y no hay que asumir una respuesta que la compañía no dio.
+
+Lo que sí es un hecho, no una hipótesis: esta pregunta ya generó ruido. Un usuario citado en la [cobertura de seguimiento de TechCrunch del 12 de agosto](https://techcrunch.com/2026/08/12/some-claude-users-are-mad-that-anthropics-new-watermarks-will-catch-them-cheating-at-their-jobs-classes/) resumió la duda de forma directa: "Si Claude empieza a marcar el código o cualquier otra cosa que genera, ¿exactamente qué está reclamando como propio?". Es una pregunta razonable para cualquier equipo que ya tenga, o esté por definir, una política sobre declarar código asistido por IA en sus pull requests — algo que ya venimos siguiendo en este blog a raíz de movimientos como el cooldown de Dependabot y GitHub Code Quality. Un watermark técnico no reemplaza esa política; en el mejor de los casos, en el futuro, podría convertirse en una señal adicional para auditarla.
+
+## Qué hacer con esto ahora
+
+Tres cosas concretas, sin esperar a que Anthropic publique la guía de detección:
+
+Si tu organización ya exige etiquetar el código o los PRs generados con asistencia de IA, seguí haciéndolo de forma explícita (trailers de commit, labels de PR, o el mecanismo que uses) — el watermark todavía no tiene una herramienta de verificación pública, así que no podés depender de él como control de auditoría hoy.
+
+Si usás Claude a través de AWS Bedrock, Google Cloud o Microsoft Foundry en tu stack empresarial, confirmá con el proveedor qué parte del marcado (texto, metadatos de archivo, o ambos) está soportada en esa integración puntual, porque Anthropic aclara que varía según la plataforma.
+
+Y si tu shop combina IBM i con agentes de código — algo cada vez más común a medida que RPG y COBOL se exponen como servicios modernos — vale la pena anotar este tema en la carpeta de "gobernanza de agentes" que probablemente ya tengas abierta, junto con el resto de las obligaciones del Artículo 50: la marca en sí no cambia lo que tenés que documentar, pero sí es la primera señal concreta de cómo los proveedores van a intentar automatizar esa documentación.
