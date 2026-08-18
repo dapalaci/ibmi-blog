@@ -1,0 +1,39 @@
+---
+title: "IBM se alía con OpenAI para modernizar aplicaciones: qué cambia (y qué no) para un shop de RPG"
+excerpt: "El 13 de agosto IBM anunció que integrará GPT-5.6, Codex y ChatGPT Work en su plataforma de consultoría. Uno de los tres ejes declarados es modernización de aplicaciones legadas. Vale la pena mirar qué implica esto en paralelo con watsonx Code Assistant for i, la apuesta propia de IBM para RPG."
+date: "2026-08-17"
+pillar: "ibmi"
+draft: true
+---
+
+El 13 de agosto, IBM anunció una alianza estratégica con OpenAI para llevar modelos y productos de esta última —GPT-5.6, Codex y ChatGPT Work— a IBM Consulting Advantage, la plataforma con la que IBM entrega sus servicios de consultoría. El anuncio define tres ejes de trabajo conjunto: convertir flujos operativos heredados en procesos "listos para IA", modernizar aplicaciones y acelerar desarrollo de software, y ampliar la colaboración en ciberseguridad. El segundo eje es el que le importa directamente a cualquiera que gestione una base de código RPG sobre IBM i, porque IBM Consulting es, hoy, uno de los actores más grandes en proyectos de modernización de IBM i para clientes grandes.
+
+Lo interesante no es solo el anuncio en sí, sino lo que dice —y lo que no dice— sobre la estrategia de IBM frente a un problema que este blog viene siguiendo de cerca: cómo se usa IA para trabajar sobre código RPG sin documentar.
+
+## Qué anunciaron exactamente
+
+Según el comunicado oficial y una entrevista posterior de IBM Think con Michael Healy, Managing Partner de IBM Consulting, la pieza de modernización de aplicaciones consiste en combinar Codex y ChatGPT Work con la tecnología y el expertise de dominio de IBM Consulting, incluyendo integración con IBM Consulting Advantage. Healy lo describió así: "Codex como asistente de código va a acelerar el ciclo de modernización y desarrollo de aplicaciones en combinación con el *coding harness* de IBM Consulting Advantage y los modelos de OpenAI".
+
+El anuncio también menciona Context Studio y Process Studio, dos componentes de IBM Consulting Advantage que —según Healy— sirven para codificar el conocimiento de una empresa sobre sus propios procesos y para analizar procedimientos operativos existentes en busca de ineficiencias, antes de tocar una línea de código. IBM también dijo que va a formar unidades especializadas de consultores certificados por OpenAI Partner Network para trabajar directamente en entornos regulados y flujos complejos, y que va a crear una práctica dedicada a OpenAI dentro de la consultora.
+
+Todo esto está enfocado, en el anuncio, en cuatro industrias (servicios financieros, gobierno, telecomunicaciones y retail) y en dominios funcionales como finanzas, procurement, operaciones de cliente y RRHH. IBM i no aparece nombrado en ningún momento del comunicado. Pero buena parte de esas cuatro industrias —bancos, aseguradoras, distribuidoras— son exactamente el perfil de cliente que hoy corre su núcleo transaccional sobre IBM i y RPG.
+
+## El contraste que vale la pena mirar: Granite vs. GPT-5.6
+
+Este blog ya cubrió antes watsonx Code Assistant for i, el producto que IBM viene construyendo desde mayo de 2025 sobre un modelo Granite propio, entrenado específicamente para RPG con Redbooks, repositorios públicos y código aportado por la comunidad de IBM i. Ese producto seguía en vista previa privada la última vez que se consultó la página oficial de IBM, con generación de código y creación de tests planificadas para etapas posteriores.
+
+La alianza con OpenAI es, en ese sentido, un movimiento distinto y en paralelo: IBM no está reemplazando su apuesta en Granite, está sumando la capacidad de Codex y GPT-5.6 —modelos generalistas de OpenAI, sin que exista información pública de que estén ajustados específicamente para RPG— a la capa de consultoría que entrega los proyectos de modernización. Ninguna de las dos fuentes primarias consultadas para esta nota (el comunicado de IBM y la nota de IBM Think) menciona si Codex tiene o no entrenamiento específico en RPG. Es un dato relevante que, hasta donde se pudo verificar, simplemente no está publicado.
+
+Esa distinción importa en la práctica. Si tu organización contrata a IBM Consulting para un proyecto de modernización de RPG a partir de ahora, vale la pena preguntar explícitamente qué modelo va a tocar tu código: si es el Granite ajustado para RPG (vía watsonx Code Assistant for i, cuando esté disponible de forma más amplia) o si es Codex/GPT-5.6 operando como asistente generalista dentro del *coding harness* de Consulting Advantage, con el conocimiento de dominio aportado por Context Studio y Process Studio en vez de por el ajuste fino del modelo. No son necesariamente incompatibles —de hecho el anuncio sugiere que ambos conviven dentro de la misma consultora— pero sí son caminos distintos para llegar al mismo resultado, con distintas garantías sobre qué tan bien el modelo entiende RPG de entrada.
+
+## Un ejemplo de cómo se vería en la práctica
+
+Pensemos en un caso típico: una aseguradora mediana con un núcleo de suscripción de pólizas escrito en RPG hace veinticinco años, sin documentación actualizada, y con dos de los tres programadores originales ya jubilados. Si esa aseguradora contrata a IBM Consulting bajo este nuevo esquema, el proyecto probablemente empezaría —según lo que describe Healy sobre el orden de trabajo— por mapear el proceso de negocio real con Process Studio: qué reglas de suscripción existen hoy, dónde están esas reglas codificadas, qué partes del flujo dependen de decisiones humanas que nunca se documentaron. Recién después de tener ese mapa entraría la capa de generación o transformación de código, con Codex y el *coding harness* de Consulting Advantage haciendo el trabajo de traducción o refactorización.
+
+Ese orden —primero entender el negocio, después generar código— es el mismo patrón que ya vimos en otras herramientas de modernización de RPG con IA, sea de terceros o de la propia IBM. La diferencia acá es de escala y de quién lo ofrece: no es una startup ni una herramienta puntual, es la consultora más grande históricamente asociada al ecosistema IBM i empaquetando este enfoque como servicio.
+
+## Conclusión práctica
+
+Si tu empresa está evaluando modernizar RPG con ayuda externa en los próximos meses, esta alianza agrega una opción concreta a la lista, pero no cambia las preguntas que ya valía la pena hacer antes de firmar un contrato de modernización asistida por IA. Preguntá específicamente qué modelo va a procesar tu código y si tiene o no entrenamiento relevante para RPG; pedí ver el mapa de procesos o dependencias que se construye antes de generar o transformar código, no solo el resultado final; y aclará por contrato dónde vive tu código y tus datos durante el proceso, sobre todo si operás en un sector regulado, porque el propio anuncio de IBM reconoce que ese es justamente el terreno donde plantea desplegar sus unidades especializadas. Ninguna alianza entre proveedores resuelve por sí sola el problema de fondo —código sin documentar y conocimiento de negocio que se está yendo con cada jubilación—; en el mejor de los casos, ordena mejor el trabajo de encontrarlo.
+
+*Fuentes: IBM Newsroom, "IBM Partners with OpenAI to Accelerate Secure AI Deployment for Enterprises Across Core Operations", 13 de agosto de 2026; IBM Think, "IBM and OpenAI team up to bring AI deeper into the enterprise", 13 de agosto de 2026; IBM, "Introducing the upcoming IBM watsonx Code Assistant for i", consultado el 17 de agosto de 2026.*
