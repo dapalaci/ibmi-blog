@@ -1,0 +1,39 @@
+---
+title: "Kiro Crew de AWS: el agente de código deja de ser un asistente y empieza a ser un compañero de equipo"
+excerpt: "El 4 de agosto AWS liberó como open source Kiro Crew, un workspace que coordina varios agentes de IA para trabajo asíncrono y de larga duración: triage de tickets, investigación de incidentes, migraciones. Ya lo usan más de 39.000 desarrolladores internos de Amazon. La pieza más interesante no es la automatización — es cómo intenta resolver la gobernanza de una flota de agentes, no de uno solo."
+date: "2026-08-24"
+pillar: "ia"
+draft: true
+---
+
+Hasta ahora, la forma dominante de trabajar con un agente de código ha sido conversacional: le pedís algo, mirás lo que hace, aprobás o corregís, y esa sesión termina cuando cerrás la terminal o el editor. Es el modelo de Claude Code, Copilot, Cursor o Codex en su uso más común. El 4 de agosto AWS publicó algo que apunta a otro problema: qué pasa con el trabajo que no cabe en una sesión — una migración de framework que toma ocho horas, una cola de tickets que hay que triar todos los días, un incidente que hay que investigar mientras el equipo duerme. Ese producto se llama Kiro Crew, es open source, y en menos de seis meses de uso interno ya lo adoptaron más de 39.000 desarrolladores de Amazon, con cerca de 500 contribuyentes internos sumando código a un ritmo de 143 commits semanales en promedio.
+
+## Qué es Kiro Crew, en concreto
+
+Kiro Crew no es un modelo ni un agente nuevo: es una capa de orquestación que se instala arriba de la CLI de Kiro (el producto de codificación con IA de AWS) y que coordina varios agentes trabajando en paralelo, preserva contexto entre sesiones, programa trabajo recurrente y expone un dashboard web y de escritorio donde se ve, en tiempo real, qué está haciendo cada agente: su razonamiento, cada llamada a herramienta y el resultado. Darko Mesaros, developer advocate de AWS, lo describió como "una capa de aplicación que convierte agentes de código en compañeros de equipo autónomos, siempre activos y que aprenden de forma continua".
+
+Para no quedarse en la promesa abstracta, AWS lanzó junto con Kiro Crew tres aplicaciones de referencia que muestran para qué sirve en la práctica:
+
+- **DevFleets**, para gestión de worktrees cuando varios agentes trabajan sobre el mismo repositorio en paralelo sin pisarse.
+- **Issue Radar**, que triagea automáticamente colas de tickets e issues y señala cuáles necesitan atención humana.
+- **Task Runner**, pensado para ejecutar tareas de ingeniería de larga duración con checkpoints y reintentos, sin supervisión continua.
+
+Ninguna de las tres es un producto aislado: son interfaces de usuario construidas sobre el mismo motor de orquestación, memoria, scheduling e integraciones de Kiro Crew. La lista de casos de uso que citan los analistas consultados por InfoWorld es reveladora de por qué esto importa para equipos de plataforma, DevOps y SRE: actualización de dependencias, migraciones de framework, limpieza de tests inestables ("flaky"), triage y ruteo de colas de tickets, y el primer paso de una investigación de incidente. Es decir, el trabajo repetitivo y de larga duración que hoy consume horas de ingenieros senior sin requerir, necesariamente, su criterio en cada paso.
+
+## La pieza técnica: Agent Client Protocol
+
+Kiro Crew coordina a los agentes mediante el Agent Client Protocol (ACP), un estándar abierto que permite que cada paso del trabajo — incluida la creación de sub-agentes — quede expuesto de forma observable en tiempo real. En la práctica esto se traduce en una vista de actividad con una tarjeta por agente, donde se ve el razonamiento, cada llamada a herramienta y el resultado a medida que ocurre. AWS también construyó Kiro Crew sobre Model Context Protocol (MCP) para las integraciones con herramientas externas — el mismo estándar que ya viene apareciendo en esta columna a propósito de las allowlists que GitHub sumó a Copilot.
+
+Ahí aparece, sin embargo, el primer punto de fricción real: aunque Kiro Crew usa estándares abiertos (ACP, MCP), al lanzamiento corre exclusivamente sobre la CLI propietaria de Kiro, que además se factura por créditos. Michael Leone, analista de Moor Strategy and Insights, lo resumió así: "la dependencia es real. AWS dice que Crew corre sobre la CLI de Kiro al lanzamiento, y esa CLI es propietaria y medida por créditos, así que es el harness que realmente está conectado el día uno. Hasta que alguien haga correr un agente distinto bajo Crew y lo muestre funcionando, la parte abierta se detiene en la capa de orquestación." Para un equipo que ya usa Claude Code, Codex o Devin como agente principal, adoptar Kiro Crew hoy implica construir y validar sus propios conectores — no es plug-and-play.
+
+## Gobernanza: la parte que de verdad cambia las reglas
+
+Lo más relevante de Kiro Crew no es la automatización en sí — es el intento de resolver un problema que ya existe hoy en la mayoría de las empresas, aunque nadie lo esté midiendo: el uso de agentes como shadow IT. Leone lo planteó sin vueltas: "el uso de agentes en la mayoría de las empresas hoy es shadow IT, con desarrolladores individuales conectando sus propios agentes contra sus propias credenciales y nadie llevando registro. Un workspace compartido con gates de aprobación y logging te da un solo lugar donde ver qué corrió, qué tocó y quién lo autorizó."
+
+Para eso, Kiro Crew viene con controles concretos: sandboxing a nivel de sistema operativo, comandos denegados por defecto, bloqueo de patrones sospechosos, validación de inputs, bloqueo de rutas sensibles, redacción automática de credenciales y un log de auditoría firmado de cada acción. Cualquier intento de un agente externo de instalar una herramienta, por ejemplo, se deniega por defecto. Y porque puede desplegarse enteramente dentro del entorno del cliente — laptop, contenedor o VM, sin necesidad de cuenta AWS ni de un plano de control gestionado por AWS — un CIO puede correrlo en su propia infraestructura sin que el código ni las credenciales salgan de su perímetro.
+
+Eso no significa que sea gratis en términos organizacionales. Stephanie Walter, de HyperFRAME Research, advirtió que Kiro Crew introduce una capa de orquestación más para gestionar y asegurar, y que la mayoría de las empresas todavía no está operativamente lista para manejar enjambres de agentes autónomos: muchas ni siquiera pueden medir hoy el costo y el valor de un solo agente individual, y los agentes en paralelo multiplican llamadas a modelos, cómputo, actividad de CI, uso de API, acceso a herramientas y revisión humana — no solo consumo de tokens.
+
+## Qué hacer con esto esta semana
+
+Si tu equipo ya tiene desarrolladores conectando agentes de código por su cuenta contra tickets, incidentes o pull requests — probablemente ya lo tenés, aunque no lo hayas medido — el primer paso no es adoptar Kiro Crew: es hacer el inventario que Leone describe, de qué está corriendo hoy, con qué credenciales y sin qué aprobación. Recién con ese inventario tiene sentido evaluar si una capa de orquestación con logging y gates de aprobación — sea Kiro Crew u otra — resuelve un problema real o simplemente agrega una capa más para asegurar. Si tu stack de agentes ya está resuelto en torno a Claude Code, Codex u otro harness distinto de Kiro, no esperes que la integración sea inmediata: presupuestá el trabajo de construir y validar tu propio conector antes de comprometer un flujo de producción a esta orquestación. Y si estás evaluando cualquier herramienta de agentes en paralelo, empezá a medir ahora — antes de escalar — cuánto cuesta realmente cada agente por hora de trabajo útil, porque esa es la pregunta que, según los propios analistas del sector, casi ninguna empresa puede responder todavía.
