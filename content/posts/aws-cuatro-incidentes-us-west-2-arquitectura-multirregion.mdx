@@ -1,0 +1,43 @@
+---
+title: "Cuatro incidentes en cuatro meses: lo que la racha de fallas de AWS en US-WEST-2 dice sobre depender de una sola región"
+excerpt: "Entre mayo y agosto de 2026, AWS sumó cuatro incidentes de disponibilidad, dos de ellos por el mismo tramo de red que conecta US-WEST-2 con el área metropolitana de Seattle. Ninguno se acerca al apagón de 15 horas de octubre de 2025, pero juntos son una razón concreta para revisar, esta semana, qué tan expuesto está tu negocio a una sola región de un solo proveedor."
+date: "2026-08-25"
+pillar: "cloud"
+draft: true
+---
+
+El 24 de julio de 2026, a las 7:40 de la mañana hora del Este, Apple Pay, DoorDash, Reddit, Hulu y PlayStation Network dejaron de responder casi al mismo tiempo. La causa, confirmada por AWS, fue un problema de conectividad en la región US-WEST-2 (Oregón), concentrado en el tramo de red que conecta esa región con el área metropolitana de Seattle. El incidente duró alrededor de 80 minutos: corto para los estándares de AWS, pero suficiente para que diez servicios internos —Direct Connect, Global Accelerator, API Gateway, EC2, ECS, ELB y VPC entre ellos— quedaran afectados, y para que al menos siete proveedores distintos tuvieran que abrir su propio reporte de incidente.
+
+Lo que hace que esta historia valga la pena contar no es ese incidente puntual, sino lo que vino antes y después. Fue el tercero en once semanas, según el conteo de TechTimes, precedido por una falla de refrigeración en un centro de datos de Virginia del Norte en mayo (unas 14 horas hasta la recuperación completa) y una disrupción de red en junio vinculada al proveedor Zayo. Y a comienzos de agosto llegó un cuarto: una interrupción más corta, de apenas 20 minutos más un episodio de reconvergencia de 12 minutos, resuelta entre las 3:55 y las 4:59 de la madrugada hora del Pacífico. AWS volvió a señalar el mismo tramo de red hacia Seattle Metro como responsable, sin confirmar si comparte causa raíz con el incidente de julio.
+
+Cuatro eventos en cuatro meses, con causas distintas en las capas de infraestructura: refrigeración física en mayo, un proveedor de red externo en junio, y dos veces la misma ruta de red interna en julio y agosto. Tratarlos como una sola historia de "AWS se está cayendo a pedazos" sería exagerado —ninguno se acerca a las 15 horas y los más de 11 millones de reportes en Downdetector que dejó el fallo de DNS en DynamoDB de octubre de 2025—, pero ignorar que dos de los cuatro apuntan al mismo punto de falla también sería un error.
+
+## Por qué esto le importa a un equipo que no tuvo ningún problema el 24 de julio
+
+La mayoría de las aplicaciones que dependen de AWS no notaron nada ese viernes. Eso no significa que el patrón sea irrelevante. US-EAST-1 y US-WEST-2 concentran una parte desproporcionada de la infraestructura crítica de internet: la primera porque es la región original de AWS desde 2006 y todavía aloja funciones de plano de control de las que otras regiones dependen; la segunda porque es una de las más grandes y la elegida por defecto por muchas empresas que buscan baja latencia hacia Asia-Pacífico. Cuando cualquiera de las dos tiene un mal día, la lista de afectados no se limita a startups: en mayo aparecieron Coinbase, FanDuel y CME Direct.
+
+Para un equipo de plataforma o infraestructura, la pregunta útil no es "¿deberíamos dejar AWS?" —migrar de proveedor cloud es costoso, lento y desproporcionado frente a un apagón de 80 minutos— sino una más incómoda: si mañana US-WEST-2 (o la región que uses) tiene una interrupción de conectividad de una hora, ¿qué de lo que corrés ahí se cae con ella, y hace cuánto que no probás el failover?
+
+## Un ejemplo concreto: qué mirar antes de que pase
+
+Dos prácticas separan a los equipos que sintieron el apagón de julio como una anécdota de los que lo sintieron como una crisis:
+
+Primero, el diseño multi-región dentro del mismo proveedor. Correr las cargas de producción en al menos dos regiones de AWS con failover automatizado habría dejado indemne a la mayoría de las aplicaciones frente a un problema de conectividad de una sola región. No es gratis —duplica buena parte de la transferencia de datos y la carga operativa—, pero sigue siendo más barato y más simple que el multi-cloud completo, que además exige evitar servicios propietarios de cada proveedor o mantener rutas de código separadas para cada uno.
+
+Segundo, monitoreo que no dependa únicamente de la página de estado de AWS. Las cuentas con soporte Business o Enterprise pueden consultar la API de AWS Health directamente en vez de refrescar un dashboard durante el incidente:
+
+```bash
+# Eventos abiertos o próximos de AWS Health para regiones específicas
+aws health describe-events \
+  --filter '{"regions":["us-west-2","us-west-1"],"eventStatusCodes":["open","upcoming"]}' \
+  --region us-east-1
+
+# Sin plan Business o Enterprise: consultar el feed público de estado
+curl -s https://status.aws.amazon.com/rss/all.rss | grep -A 2 "US-WEST-2"
+```
+
+Esto no acorta un incidente de 80 minutos. Sí reduce el tiempo entre que algo empieza a fallar y que un equipo de guardia se entera, que es exactamente el margen que importa cuando el problema se resuelve en menos de una hora y no hay tiempo para reaccionar manualmente. Vale la pena notar también la brecha entre lo que AWS reporta como afectado (diez servicios internos, en el caso de julio) y lo que terceros como IncidentHub registraron como incidentes en cascada (siete proveedores): un monitoreo que solo mira el estado de AWS no necesariamente detecta que un proveedor del que dependés, aguas abajo, también tuvo un problema.
+
+## La conclusión práctica
+
+Ninguno de los cuatro incidentes de 2026 cambió la posición de mercado de AWS —sigue liderando con 28% de participación global, según Synergy Research, por delante de Azure (21%) y Google Cloud (14%)— ni debería cambiar, por sí solo, la decisión de qué proveedor cloud usar. Pero si tu arquitectura corre en una sola región y todavía no probaste qué pasa cuando esa región pierde conectividad por una hora, esta semana es un buen momento para hacerlo antes de que lo decida un tercer incidente en el tramo de red hacia Seattle. Auditar qué servicios de producción tienen un único punto de falla regional, revisar si tu equipo puede consultar el estado de AWS de forma programática en vez de depender de una página web durante el incidente, y ensayar el runbook de failover con el equipo de guardia son las tres tareas concretas que salen de esta racha —no una migración de proveedor, sino una prueba de que el plan que ya tenés en el papel funciona quince minutos después de que empieza a sonar la alarma.
