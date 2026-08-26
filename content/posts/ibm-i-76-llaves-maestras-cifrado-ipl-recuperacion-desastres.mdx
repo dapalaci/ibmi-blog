@@ -3,7 +3,7 @@ title: "IBM i 7.6: el cambio en llaves maestras que puede dejar tu IPL esperando
 excerpt: "Más allá del BYOK vía IBM Key Protect que ya cubrimos, el Technology Refresh de julio tocó algo más profundo: cómo IBM i gestiona sus llaves maestras internas, con una opción que puede bloquear el arranque del sistema hasta que un administrador entregue una llave. Vale la pena entender el mecanismo antes de activarlo."
 date: "2026-08-15"
 pillar: "ibmi"
-draft: true
+draft: false
 ---
 
 Cuando cubrimos el Technology Refresh de verano de IBM i 7.6/7.5 a comienzos de agosto, nos quedamos en la superficie de una de sus piezas: Bring Your Own Key (BYOK) vía IBM Cloud Key Protect, pensado para quien corre su partición en PowerVS y necesita demostrarle a un auditor que controla sus propias llaves de cifrado. El 10 de agosto, [IT Jungle publicó una cobertura más profunda](https://www.itjungle.com/2026/08/10/inside-the-encryption-key-management-changes-in-ibm-i-7-6/) que muestra que el cambio real va más allá de esa integración con la nube: IBM también tocó cómo se administran las llaves maestras dentro del propio sistema operativo, y una de las opciones nuevas puede literalmente dejar una partición sin poder completar el IPL hasta que alguien le entregue una llave a mano. Es el tipo de cambio que conviene entender antes de tocarlo, no después de un desastre.
