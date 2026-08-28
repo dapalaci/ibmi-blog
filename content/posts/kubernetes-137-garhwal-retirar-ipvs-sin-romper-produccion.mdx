@@ -1,0 +1,45 @@
+---
+title: "Kubernetes 1.37 'Garhwal': la lección de gobernanza detrás de retirar una función sin romper producción"
+excerpt: "La versión 1.37 de Kubernetes, lanzada el 26 de agosto, trae KYAML estable, taints y tolerations para hardware vía DRA y un mecanismo para que los nodos negocien versiones solos. Pero lo más útil para un equipo de plataforma híbrida es el plan de cinco etapas con el que el proyecto retira IPVS de kube-proxy sin apurar a nadie."
+date: "2026-08-27"
+pillar: "cloud"
+draft: false
+---
+
+El 26 de agosto, el proyecto Kubernetes publicó en su blog oficial la disponibilidad general de la versión 1.37, con nombre en código "Garhwal". Es un lanzamiento de cadencia normal — el tercero del año, siguiendo el ciclo trimestral habitual — y por eso mismo es fácil dejarlo pasar como una actualización más. Pero dentro de las 67 mejoras que trae (16 graduadas a estable, 23 a beta, 27 nuevas en alpha y una deprecación formal), hay un patrón que vale la pena mirar de cerca si tu organización opera Kubernetes junto a sistemas que no se pueden actualizar de un día para el otro: cómo retirar una pieza de infraestructura crítica sin dejar a nadie en producción con el cluster roto un lunes a la mañana.
+
+## El caso de estudio: IPVS se va, pero en cámara lenta
+
+La deprecación más visible de esta versión es la del modo IPVS en kube-proxy, el componente que traduce los `Service` de Kubernetes en reglas de balanceo de carga a nivel de nodo. IPVS fue durante años la alternativa de alto rendimiento a `iptables` para clusters grandes, pero el kernel de Linux está dejando atrás las versiones que lo soportan bien a medida que esas ramas LTS terminan su ciclo de vida hacia fines de 2026. El reemplazo natural es el backend `nftables`, que Kubernetes viene puliendo desde hace varias versiones.
+
+Lo interesante no es la decisión en sí — es exactamente el tipo de deuda técnica que cualquier plataforma termina pagando — sino cómo el proyecto la ejecuta. En vez de anunciar la remoción y dar seis meses de plazo, Kubernetes definió un plan de cinco etapas repartidas a lo largo de varias versiones mayores:
+
+1. **v1.35** — advertencias de deprecación en logs y documentación, sin cambios de comportamiento.
+2. **v1.37** (la que acaba de salir) — se introduce el feature gate `KubeProxyIPVS`, que permite fijar explícitamente el modo IPVS mientras dura la transición.
+3. **v1.40** — IPVS deja de ser el modo por defecto para quien no lo haya fijado a mano.
+4. **v1.43** — se elimina el código del backend IPVS del binario de kube-proxy.
+5. **v1.46** — limpieza final del feature gate, ya sin rastro de la función.
+
+Son, como mínimo, once versiones y varios años de ventana entre el primer aviso y la eliminación completa. Para un equipo de plataforma que gestiona clusters de Kubernetes al lado de un IBM i que corre con ciclos de Technology Refresh medidos en años — algo que ya cubrimos en este blog al hablar del fin de soporte de IBM i 7.4 —, esta cadencia debería resultar familiar: es la misma lógica de dar tiempo real para migrar antes de cortar el piso, documentada con fechas concretas en vez de promesas vagas de "eventualmente".
+
+La acción concreta para esta semana es simple: correr `kubectl get configmap kube-proxy -n kube-system -o yaml` (o revisar el `values.yaml` si el cluster se gestiona con Helm) y confirmar qué modo está configurado hoy. Si es IPVS y nunca se fijó explícitamente, conviene decidir ahora — con años de margen — si migrar a `nftables` o declarar el modo de forma explícita con el nuevo feature gate mientras se planifica la migración con calma.
+
+## KYAML: por fin una salida de YAML que no miente
+
+La segunda novedad de la 1.37 que tiene aplicación inmediata es la graduación a estable de KYAML, un formato de salida para `kubectl` diseñado para eliminar de raíz el llamado "problema de Noruega": el hecho de que YAML estándar interpreta valores como `no`, `off` o `NO` como booleanos en vez de strings, algo que llevó años rompiendo manifiestos de forma silenciosa (el país "NO" — Noruega — desaparecía de listas de códigos ISO procesadas como YAML). KYAML usa un subconjunto de "flow style" de YAML: llaves `{}` para mapas, corchetes `[]` para listas y comillas dobles obligatorias para strings. El resultado es un formato que sigue siendo YAML válido pero elimina la sensibilidad a espacios y la coerción de tipos ambigua, sin perder la capacidad de tener comentarios.
+
+Para equipos que generan manifiestos de Kubernetes a partir de datos externos — por ejemplo, exportando configuración desde un sistema IBM i hacia un `ConfigMap` — este cambio reduce una categoría entera de bugs silenciosos que hasta ahora solo aparecían en producción, cuando un valor como `pais: NO` (por código de país) se convertía en `pais: false` sin que nadie lo notara hasta que algo dependía de ese campo.
+
+## Taints y tolerations para hardware, no solo para nodos
+
+La tercera pieza relevante es la graduación a estable de "device taints and tolerations" dentro de DRA (Dynamic Resource Allocation, el mecanismo moderno para pedir GPUs y otro hardware especializado). Hasta ahora, el modelo de taints y tolerations de Kubernetes aplicaba a nodos completos: se podía marcar un nodo entero como no apto para recibir ciertos pods. Con esta mejora, el mismo mecanismo aplica a nivel de dispositivo individual. Un driver de DRA — o un administrador, mediante un nuevo objeto `DeviceTaintRules` — puede marcar una GPU específica dentro de un nodo como degradada (`NoSchedule`, para bloquear nuevos pods) o forzar su liberación (`NoExecute`, para desalojar lo que ya está corriendo ahí), sin tener que sacar de servicio el nodo completo. Un pod puede tolerar explícitamente ese taint en su `ResourceClaim` si necesita seguir usando el dispositivo pese a la degradación, por ejemplo para pruebas.
+
+Para cualquier organización que empezó a meter GPUs on-premise para cargas de IA — un patrón que se está volviendo común incluso en shops con historia IBM i, a medida que suman modelos de lectura de documentos o asistentes de código — esto es un cambio operativo real: permite aislar hardware fallado sin drenar todo el nodo, algo que antes obligaba a mover cargas de trabajo sanas junto con las que sí dependían del dispositivo roto.
+
+## Node Declared Features: menos coordinación manual en upgrades escalonados
+
+La cuarta mejora que vale mencionar, también graduada a estable, es "Node Declared Features": los nodos ahora pueden anunciar directamente al plano de control qué capacidades tienen habilitadas según sus feature gates activos. Antes, mantener un cluster con nodos en distintas versiones durante un rolling upgrade — algo inevitable en clusters grandes o con actualizaciones escalonadas por zona — requería taints, labels o reglas de afinidad configuradas a mano para evitar que el scheduler mandara un pod a un nodo que todavía no soportaba la función que ese pod necesitaba. Con esta mejora, esa negociación de compatibilidad la resuelve el propio cluster, reduciendo el margen de error humano exactamente en el momento — un upgrade en progreso — donde más pesa un error de coordinación.
+
+## Qué hacer con esto esta semana
+
+Ninguna de estas cuatro mejoras exige acción inmediata, y esa es justamente la idea: Kubernetes 1.37 es un lanzamiento pensado para dar tiempo, no para forzar decisiones. Pero hay tres tareas concretas que un equipo de plataforma híbrida puede sacarse de encima esta semana sin apuro: confirmar el modo de kube-proxy en cada cluster y anotar la fecha objetivo de migración a `nftables` antes de que la 1.40 cambie el default; si el equipo genera manifiestos de Kubernetes a partir de datos exportados de otros sistemas, evaluar migrar esa generación a KYAML para eliminar de raíz los bugs de coerción de tipos; y si hay GPUs on-premise sirviendo cargas de IA, revisar si vale la pena adoptar `DeviceTaintRules` para aislar hardware degradado sin drenar nodos completos. Son cambios chicos hoy que evitan sorpresas grandes dentro de un año.
