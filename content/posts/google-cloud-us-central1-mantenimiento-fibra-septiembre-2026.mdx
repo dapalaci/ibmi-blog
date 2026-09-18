@@ -1,0 +1,41 @@
+---
+title: "El apagón de Google Cloud del 1 de septiembre: un mantenimiento pensado para varios días se ejecutó en 13 minutos"
+excerpt: "El 10 de septiembre, Google Cloud publicó el informe final de la interrupción que aisló de la red a una porción de us-central1 durante más de cuatro horas. La causa no fue un fallo de hardware: fue un procedimiento de mantenimiento que debía avanzar router por router y que, por un error en cómo se armó la orden de trabajo, terminó desconectando todos los enlaces de fibra a la vez."
+date: "2026-09-17"
+pillar: "cloud"
+draft: false
+---
+
+El 1 de septiembre de 2026, entre las 7:41 y las 11:52 de la mañana hora del Pacífico, una porción de la zona us-central1-b de Google Cloud (y, en menor medida, us-central1-f) quedó aislada de la red. Durante el pico del incidente la tasa de pérdida de tráfico hacia los recursos alojados ahí llegó al 100%: máquinas virtuales inalcanzables desde internet, bases de datos con la conectividad cortada, clústeres de Kubernetes con el plano de control fuera de servicio. Google publicó un aviso preliminar el 3 de septiembre y el informe final —con causa raíz confirmada y plan de remediación— el 10 de septiembre, en su página oficial de Service Health. Vale la pena leerlo completo, porque la causa no fue una falla de hardware inesperada: fue un proceso de cambio que salió exactamente como estaba diseñado para no salir.
+
+## Un router a la vez, durante varios días, salvo que no fue así
+
+La arquitectura de cada centro de datos de Google Cloud está pensada para tolerar la caída de un router o de un tramo de fibra sin que el cliente lo note: los equipos están duplicados, en salas separadas, con fuentes de energía distintas. El mantenimiento del 1 de septiembre era una actualización de capacidad programada en los routers que sirven una fracción de us-central1-b, y el procedimiento correcto —upgradear un router por vez, a lo largo de varios días, desviando tráfico y verificando que la red volviera a estar completamente conectada entre paso y paso— existía. El problema fue cómo se le entregó el trabajo al técnico: un error en el proceso, orquestado manualmente, hizo que se emitiera la lista completa de reemplazos de transceptores en todos los routers de una vez, sin instrucciones para secuenciarlo router por router. El flujo de mantenimiento tampoco incluyó los pasos de verificación humana y de software que deberían haber detectado la desviación a tiempo.
+
+El resultado: el técnico desconectó secuencialmente el 100% de los caminos de fibra en los dispositivos afectados en 13 minutos. La velocidad y la naturaleza del error no dejaron margen para que apareciera una advertencia antes de que se perdiera la conectividad completa. Y había un control adicional que tampoco se siguió: el procedimiento estándar exige detenerse si se detecta luz en un cable de fibra óptica después de desconectarlo —señal de que ese cable seguía transportando tráfico real—, y ese chequeo no se aplicó. Los transceptores de reemplazo, además, no eran compatibles con los que seguían instalados en el resto de la infraestructura de red del centro de datos, lo que convirtió cada desconexión en una pérdida de conectividad real, no en una transición ordenada.
+
+## Lo que se vio del otro lado
+
+El informe de Google detalla el impacto servicio por servicio, y ahí es donde el incidente deja de ser una anécdota de operaciones internas y se vuelve relevante para cualquiera que corra carga de producción en la nube. Google Kubernetes Engine tuvo errores y timeouts en las llamadas al plano de control (el Kubernetes API server) de los clústeres en us-central1 entre las 7:40 y las 9:15, lo que pudo hacer fallar el scheduling de cargas nuevas o actualizadas y cualquier operación contra la API durante ese lapso. Cloud Spanner y Firestore, en sus instancias multirregión nam5, mostraron tasas elevadas de error en llamadas RPC, timeouts de escritura y picos de latencia, aun sin estar "caídos" en el sentido estricto. Cloud Run y App Engine evacuaron automáticamente cargas hacia capacidad sana en otras zonas, lo que generó picos de latencia y abortos de cola pendientes; un subconjunto de esas cargas siguió degradado hasta el cierre del incidente, a las 11:52. Cloud SQL, AlloyDB, Bigtable y Filestore perdieron directamente el acceso a los datos para las instancias que vivían físicamente en la infraestructura afectada.
+
+Un detalle que el propio informe subraya y que conviene no pasar por alto: los clientes que tenían proyectos desplegados en ambas zonas afectadas —us-central1-b y us-central1-f— no vieron impacto multizona, porque a lo sumo una de sus dos zonas tenía capacidad en el centro de datos dañado. Es la prueba, en los propios datos del incidente, de que el diseño multizona funcionó exactamente como debía para quien ya lo tenía implementado. El problema nunca fue la arquitectura de redundancia de Google; fue un proceso humano que la sorteó por completo en una sola zona.
+
+## Qué está cambiando Google, y qué debería revisar cualquier equipo de plataforma
+
+El plan de remediación que acompaña el informe tiene cuatro puntos concretos: reforzar el entrenamiento sobre técnicas seguras de mantenimiento —incluyendo el requisito obligatorio de verificar si hay luz en cada fibra antes de desconectarla—, terminar la migración de los flujos de actualización de red hacia un sistema de orquestación totalmente automatizado y secuenciado (los flujos regionales más comunes ya se completaron en 2025; los zonales siguen en curso), desplegar alertas que detengan el trabajo ante una desconexión de fibra no planificada, y automatizar el desvío de tráfico regional para reducir el tiempo de reacción de los aproximadamente 19 minutos que tomó este incidente a unos 5.
+
+Para un equipo que no es Google pero administra infraestructura propia, la lectura útil no es "confiar menos en la nube": es que este tipo de falla —un cambio manual, agrupado, sin puntos de verificación intermedios— es exactamente el patrón que los procesos de change management en cualquier organización deberían estar diseñados para prevenir, y que un runbook bien escrito en un documento no sirve de nada si la orden de trabajo real que llega a quien ejecuta el cambio no refleja esa secuencia. Vale la pena revisar, en los propios procedimientos, si existe una diferencia entre "cómo decimos que hacemos los cambios de infraestructura" y "qué instrucción concreta recibe la persona que aprieta el botón". También vale la pena confirmar, y no asumir, el propio diseño multizona: en Google Cloud, comprobar en qué zonas concretas corren las instancias redundantes es una consulta de un minuto.
+
+```bash
+# Ver en qué zonas de una región están distribuidas las instancias de Compute Engine
+gcloud compute instances list \
+  --filter="zone:us-central1-*" \
+  --format="table(name,zone,status)"
+
+# Confirmar que un clúster de GKE regional realmente reparte nodos en más de una zona
+gcloud container clusters describe MI_CLUSTER \
+  --region us-central1 \
+  --format="value(locations)"
+```
+
+El incidente del 1 de septiembre duró cuatro horas y once minutos y no llegó a la escala de los grandes apagones de 2025. Pero el informe final es uno de los más honestos que ha publicado un proveedor cloud grande en lo que va del año, y la lección que deja no es sobre fibra óptica: es sobre qué tan fácil es que un proceso de cambio bien diseñado en el papel colapse en la ejecución cuando falta un solo paso de verificación entre "emitir la orden de trabajo" y "que alguien la ejecute".
