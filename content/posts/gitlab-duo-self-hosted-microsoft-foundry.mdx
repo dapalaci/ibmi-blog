@@ -1,0 +1,55 @@
+---
+title: "GitLab Duo Self-Hosted suma Microsoft Foundry: quién controla el modelo que lee tu código"
+excerpt: "GitLab amplió su oferta Duo Self-Hosted para desplegar modelos de OpenAI, Anthropic, Meta y Mistral a través de Microsoft Foundry, dentro de la red del propio cliente. Es la respuesta de una plataforma DevOps a una pregunta que cada vez más equipos de plataforma no pueden seguir postergando: quién controla la infraestructura por la que pasa el código antes de llegar al modelo."
+date: "2026-09-24"
+pillar: "cloud"
+draft: false
+---
+
+El 8 de septiembre GitLab publicó en su blog oficial la integración de GitLab Duo Self-Hosted con Microsoft Foundry: la posibilidad de correr los modelos que alimentan las funciones de IA de GitLab (completado de código, generación, chat agéntico, la plataforma de agentes) sobre infraestructura de Azure que administra la propia organización, en lugar de enrutar esas solicitudes a través de servicios gestionados por GitLab. InfoQ le dedicó un análisis el 22 de septiembre, y vale la pena mirar el anuncio con algo más de detalle que un titular, porque no es una función de IA nueva: es un cambio en quién es responsable de la infraestructura que hay entre el desarrollador y el modelo.
+
+## Qué cambia exactamente
+
+La integración soporta modelos de OpenAI (varias variantes de GPT), Anthropic Claude, Meta Llama y Mistral —incluido Codestral, especializado en código— desplegados a través de Microsoft Foundry. La arquitectura tiene tres piezas: una instancia self-managed de GitLab, un AI Gateway que corre en la red del cliente (por defecto en el puerto 5052) y los endpoints de los modelos en Microsoft Foundry. El gateway es el punto único por el que pasan las solicitudes, y GitLab permite asignar un modelo distinto a cada función: se puede usar Claude para el chat agéntico y Codestral para el completado de código, por ejemplo, evaluando cada modelo contra cuatro áreas de capacidad específicas de la función en lugar de elegir "una familia de modelos para todo".
+
+Lo que hace a esto relevante para gobernanza, y no solo para arquitectura, es qué queda dentro de la red del cliente. En una configuración completamente self-hosted, la documentación de GitLab es explícita: los datos de inferencia —el código que se manda como contexto, los prompts, las respuestas del modelo— no salen de la red de la organización. Si la instancia corre bajo licencia online, lo único que sí sale son metadatos de facturación de-identificados: un ID de instancia, un conteo de llamadas, una marca de tiempo. Nada de eso es el contenido del código ni del prompt.
+
+Para una organización con requisitos de residencia de datos, regulación sectorial o aislamiento de red —un banco, una aseguradora, cualquier empresa con código bajo régimen de exportación controlada— esto resuelve un problema concreto: hoy en día casi todas las herramientas de asistencia de código con IA procesan el contexto en la infraestructura del proveedor de la herramienta, no en la del cliente. Con esta integración, los despliegues pueden anclarse a regiones de Azure específicas que coincidan con el requisito de residencia, y la organización elige el proveedor del modelo subyacente sin cambiar de plataforma DevOps.
+
+## El trade-off que el anuncio no vende tan fuerte
+
+InfoQ pone el dedo en la tensión real del anuncio: dar a las organizaciones control sobre el modelo y la infraestructura ofrece más flexibilidad, pero traslada más responsabilidad a los equipos de ingeniería y de plataforma. Antes, si algo fallaba en el asistente de código, era un ticket a soporte de GitLab. Ahora, gestionar capacidad, credenciales, ciclo de vida de los modelos y disponibilidad del AI Gateway es trabajo del equipo de plataforma interno. Esto no es distinto de la disyuntiva que cualquier equipo que evalúa Kubernetes gestionado versus self-managed ya conoce, solo que aplicada a modelos de lenguaje: la ganancia en control viene acompañada, siempre, de una cuenta de operación que alguien tiene que pagar en horas de trabajo.
+
+Vale la pena también ubicar esto frente a las otras dos formas de resolver el mismo problema que existen hoy en el mercado. GitHub Copilot ofrece una experiencia gestionada, fuertemente integrada, donde el proveedor administra el modelo y la infraestructura de principio a fin —simple de operar, pero sin la opción de anclar el procesamiento a la red propia. En el otro extremo, Amazon Bedrock y el propio Microsoft Foundry ofrecen infraestructura multi-modelo pero sin una plataforma de DevOps integrada encima: hay que construir el resto (control de versiones, CI/CD, revisión de código, tracking de trabajo) por separado. GitLab se posiciona en el medio: una capa de control agnóstica al modelo, donde la organización elige el proveedor del modelo subyacente pero GitLab sigue administrando el flujo de trabajo de desarrollo alrededor de él.
+
+## Cómo se ve en la práctica
+
+La configuración por función es el detalle técnico que más importa para un equipo de plataforma evaluando esto. No es "un modelo para toda la instancia", es una asignación explícita:
+
+```yaml
+# Ejemplo ilustrativo de asignación de modelos por función
+# en una configuración de GitLab Duo Self-Hosted
+ai_gateway:
+  endpoint: "https://ai-gateway.miempresa.internal:5052"
+  features:
+    code_completion:
+      provider: "microsoft_foundry"
+      model: "codestral-latest"
+      region: "swedencentral"
+    code_generation:
+      provider: "microsoft_foundry"
+      model: "gpt-4.1"
+      region: "swedencentral"
+    agentic_chat:
+      provider: "microsoft_foundry"
+      model: "claude-sonnet"
+      region: "swedencentral"
+```
+
+Esta granularidad tiene una consecuencia práctica directa: un equipo de seguridad puede auditar, función por función, qué modelo procesa qué tipo de dato, en lugar de aprobar o rechazar "la IA de GitLab" como una caja negra. Es el mismo principio que ya se aplica a la elección de instancias de cómputo o de motores de base de datos en la nube, llevado al modelo de lenguaje.
+
+## Qué mirar si esto te toca evaluar
+
+Si la organización ya tiene GitLab self-managed y está bajo presión de un área de compliance para justificar el uso de asistentes de código con IA, esta integración vale la pena evaluarla antes de descartar la adopción de IA generativa en el flujo de desarrollo por completo. Los puntos concretos a chequear son tres: primero, confirmar si el requisito real es "el dato no sale del país" o "el dato no sale de mi red" —son restricciones distintas y la respuesta cambia qué región de Azure y qué configuración de licencia corresponde—; segundo, dimensionar quién en el equipo de plataforma va a quedar a cargo de la disponibilidad del AI Gateway y de rotar credenciales de los endpoints de Foundry, porque ese trabajo no es gratis ni automático; y tercero, no asumir paridad de capacidad entre modelos por default, dado que GitLab mismo aclara que la evaluación es por función, así que vale la pena correr una prueba piloto acotada —por ejemplo, solo completado de código en un repositorio no crítico— antes de habilitar la plataforma de agentes completa sobre un modelo self-hosted.
+
+La tendencia de fondo importa más que el anuncio puntual: las plataformas DevOps están dejando de tratar "qué modelo de IA usás" como una decisión de producto cerrada y empezando a tratarla como una decisión de infraestructura, con las mismas preguntas de residencia, capacidad y responsabilidad operativa que ya se le hacen a cualquier otro componente crítico del stack.
